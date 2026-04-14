@@ -1,0 +1,96 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand: #185fa5;
+  --brand-dark: #0c447c;
+}
+
+@layer base {
+  html {
+    font-family: "PretendardVariable", "Apple SD Gothic Neo", -apple-system,
+      BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  /* ── 카드 ── */
+  .plan-card {
+    @apply bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800
+           transition-all duration-150 hover:border-gray-300 dark:hover:border-gray-600
+           hover:shadow-md;
+  }
+
+  .plan-card.selected {
+    @apply border-2 border-brand-600 shadow-[0_0_0_3px_rgba(24,95,165,0.12)];
+  }
+
+  /* ── 배지 ── */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+  .badge-skt  { @apply bg-red-50   text-red-700   dark:bg-red-950  dark:text-red-300; }
+  .badge-kt   { @apply bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300; }
+  .badge-lgu  { @apply bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300; }
+  .badge-free { @apply bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300; }
+  .badge-5g   { @apply bg-blue-50  text-blue-700  dark:bg-blue-950  dark:text-blue-300; }
+
+  /* ── 필터 패널 ── */
+  .filter-panel {
+    @apply bg-white dark:bg-gray-900 rounded-2xl border border-gray-100
+           dark:border-gray-800 p-5;
+  }
+
+  /* ── 버튼 ── */
+  .btn-primary {
+    @apply bg-brand-800 hover:bg-brand-600 text-white rounded-full px-6 py-3
+           font-medium text-sm transition-colors duration-150 flex items-center gap-2;
+  }
+
+  .btn-ghost {
+    @apply border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300
+           hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl px-4 py-2 text-sm
+           transition-colors duration-150;
+  }
+
+  /* ── 토글 스위치 ── */
+  .toggle-track {
+    @apply relative inline-block w-9 h-5 rounded-full bg-gray-300 dark:bg-gray-600
+           cursor-pointer transition-colors duration-200;
+  }
+  .toggle-track.on {
+    @apply bg-brand-600;
+  }
+  .toggle-thumb {
+    @apply absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white
+           shadow-sm transition-transform duration-200;
+  }
+  .toggle-thumb.on {
+    @apply translate-x-4;
+  }
+
+  /* ── 스펙 박스 ── */
+  .spec-box {
+    @apply bg-gray-50 dark:bg-gray-800 rounded-xl p-2 text-center flex-1;
+  }
+}
+
+/* ── 스크롤바 ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
+.dark ::-webkit-scrollbar-thumb { background: #374151; }
+
+/* ── 모달 스크롤 방지 ── */
+body.modal-open { overflow: hidden; }

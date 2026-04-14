@@ -1,0 +1,51 @@
+{
+  "name": "SIMsaver — 알뜰폰 요금제 비교",
+  "short_name": "SIMsaver",
+  "description": "알뜰폰 요금제를 자동 수집해 항상 최신 정보로 비교하세요",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1724",
+  "theme_color": "#0f1724",
+  "orientation": "portrait-primary",
+  "categories": ["utilities", "finance"],
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/main.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "요금제 목록 화면"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "요금제 비교",
+      "short_name": "비교",
+      "description": "요금제 나란히 비교하기",
+      "url": "/compare",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "요금제 추천",
+      "short_name": "추천",
+      "description": "사용량 기반 추천",
+      "url": "/recommend",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
