@@ -17,6 +17,8 @@ const MVNO_BADGE: Record<string, string> = {
   "LGU+": "badge badge-lgu",
 };
 
+const CLICKABLE_CARRIERS = new Set(["U+알뜰모바일", "LG헬로모바일", "스노우맨"]);
+
 export default function PlanCard({
   plan,
   isFav,
@@ -25,11 +27,16 @@ export default function PlanCard({
   onCompare,
   compareDisabled,
 }: Props) {
+  const hasLink = !!plan.url && CLICKABLE_CARRIERS.has(plan.carrier);
+
   return (
-    <article className={`plan-card p-5 relative ${inCompare ? "selected" : ""}`}>
+    <article
+      className={`plan-card p-5 relative ${inCompare ? "selected" : ""} ${hasLink ? "cursor-pointer hover:shadow-md transition-shadow" : ""}`}
+      onClick={hasLink ? () => window.open(plan.url, "_blank", "noopener,noreferrer") : undefined}
+    >
       {/* 즐겨찾기 */}
       <button
-        onClick={onFav}
+        onClick={(e) => { e.stopPropagation(); onFav(); }}
         aria-label={isFav ? "즐겨찾기 해제" : "즐겨찾기 추가"}
         className="absolute top-4 right-4 text-lg leading-none transition-transform hover:scale-110 active:scale-95"
       >
@@ -114,6 +121,7 @@ export default function PlanCard({
           className={`flex items-center gap-1.5 cursor-pointer text-xs select-none
             ${inCompare ? "text-brand-600 font-medium" : "text-gray-400"}
             ${compareDisabled && !inCompare ? "opacity-40 cursor-not-allowed" : ""}`}
+          onClick={(e) => e.stopPropagation()}
         >
           <input
             type="checkbox"
