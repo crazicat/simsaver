@@ -18,12 +18,16 @@ interface DbPlan {
   contract_months: number;
   url: string | null;
   last_crawled_at: string;
+  // 프로모션 (옵셔널 — migration 적용 전에는 undefined)
+  original_fee?: number | null;
+  promo_months?: number | null;
+  promo_text?: string | null;
 }
 
 // carrier_name → mvno 매핑
 function toMvno(carrier: string): "SKT" | "KT" | "LGU+" {
-  if (carrier.includes("KT") || carrier.includes("kt")) return "KT";
-  if (carrier.includes("U+") || carrier.includes("LG")) return "LGU+";
+  if (carrier.includes("U+") || carrier.includes("LG") || carrier.includes("우리")) return "LGU+";
+  if (carrier.includes("KT") || carrier.includes("kt") || carrier.includes("핀다")) return "KT";
   return "SKT";
 }
 
@@ -47,6 +51,9 @@ function dbToPlan(row: DbPlan): Plan {
     lastUpdated: row.last_crawled_at
       ? row.last_crawled_at.slice(0, 10)
       : new Date().toISOString().slice(0, 10),
+    originalFee: row.original_fee ?? undefined,
+    promoMonths: row.promo_months ?? undefined,
+    promoText: row.promo_text ?? undefined,
   };
 }
 

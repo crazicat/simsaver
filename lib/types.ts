@@ -20,6 +20,10 @@ export interface Plan {
   activationFee?: number;
   url?: string;
   lastUpdated: string;
+  // 프로모션/할인 정보
+  originalFee?: number;     // 할인 전 정상가
+  promoMonths?: number;     // 할인 적용 개월수 (없으면 영구/조건부)
+  promoText?: string;       // "7개월 할인", "최대 할인 적용 시" 등
 }
 
 export type SortKey = "fee_asc" | "fee_desc" | "data_desc" | "updated";

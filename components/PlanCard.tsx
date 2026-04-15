@@ -17,7 +17,13 @@ const MVNO_BADGE: Record<string, string> = {
   "LGU+": "badge badge-lgu",
 };
 
-const CLICKABLE_CARRIERS = new Set(["U+알뜰모바일", "LG헬로모바일", "스노우맨", "핀다이렉트"]);
+const CLICKABLE_CARRIERS = new Set([
+  "U+알뜰모바일",
+  "LG헬로모바일",
+  "스노우맨",
+  "핀다이렉트",
+  "우리원모바일",
+]);
 
 export default function PlanCard({
   plan,
@@ -70,10 +76,27 @@ export default function PlanCard({
 
       {/* 요금 */}
       <div className="mb-4">
-        <span className="text-2xl font-semibold text-brand-800 dark:text-brand-100 tracking-tight">
-          {fmtFee(plan.monthlyFee)}
-        </span>
-        <span className="text-xs text-gray-400 ml-1">/월</span>
+        {plan.promoText && (
+          <p className="text-[10px] font-medium text-rose-500 dark:text-rose-400 mb-0.5">
+            {plan.promoText}
+          </p>
+        )}
+        <div className="flex items-baseline gap-1.5 flex-wrap">
+          <span className="text-2xl font-semibold text-brand-800 dark:text-brand-100 tracking-tight">
+            {fmtFee(plan.monthlyFee)}
+          </span>
+          <span className="text-xs text-gray-400">/월</span>
+          {plan.originalFee && plan.originalFee > plan.monthlyFee && (
+            <span className="text-[11px] text-gray-400 line-through">
+              {fmtFee(plan.originalFee)}
+            </span>
+          )}
+        </div>
+        {plan.promoMonths && plan.originalFee && plan.originalFee > plan.monthlyFee && (
+          <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+            {plan.promoMonths}개월 이후 {fmtFee(plan.originalFee)}
+          </p>
+        )}
       </div>
 
       {/* 스펙 3칸 */}
