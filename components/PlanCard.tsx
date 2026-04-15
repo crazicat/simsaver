@@ -17,7 +17,7 @@ const MVNO_BADGE: Record<string, string> = {
   "LGU+": "badge badge-lgu",
 };
 
-const CLICKABLE_CARRIERS = new Set(["U+알뜰모바일", "LG헬로모바일", "스노우맨"]);
+const CLICKABLE_CARRIERS = new Set(["U+알뜰모바일", "LG헬로모바일", "스노우맨", "핀다이렉트"]);
 
 export default function PlanCard({
   plan,
