@@ -5,6 +5,7 @@ import { supabase } from "./supabase";
 interface DbPlan {
   id: string;
   carrier_name: string;
+  mvno: "SKT" | "KT" | "LGU+";
   network: "LTE" | "5G";
   name: string;
   monthly_fee: number;
@@ -37,7 +38,7 @@ function dbToPlan(row: DbPlan): Plan {
   return {
     id: row.id,
     carrier: row.carrier_name,
-    mvno: toMvno(row.carrier_name),
+    mvno: row.mvno ?? toMvno(row.carrier_name),
     network: row.network,
     name: row.name,
     monthlyFee: row.monthly_fee,
