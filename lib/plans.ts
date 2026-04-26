@@ -172,8 +172,9 @@ export function fmtFee(n: number) {
 
 export function fmtData(d: Plan["data"]) {
   if (d.total === "unlimited") return "완전무제한";
-  const gb = (d.total / 1024).toFixed(1);
-  return `${gb}GB`;
+  const gb = d.total / 1024;
+  if (gb < 1) return `${d.total}MB`;
+  return `${gb % 1 === 0 ? gb.toFixed(0) : gb.toFixed(1)}GB`;
 }
 
 export function fmtVoice(v: number | "unlimited") {
