@@ -181,6 +181,10 @@ export function fmtVoice(v: number | "unlimited") {
   return v === "unlimited" ? "무제한" : `${v}분`;
 }
 
+export function fmtSms(v: number | "unlimited") {
+  return v === "unlimited" ? "무제한" : (v > 0 ? `${v}건` : "0건");
+}
+
 export function fmtContract(months: number) {
   return months === 0 ? "무약정" : `${months}개월`;
 }

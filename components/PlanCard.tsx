@@ -1,6 +1,6 @@
 "use client";
 import { Plan } from "@/lib/types";
-import { fmtFee, fmtData, fmtVoice } from "@/lib/plans";
+import { fmtFee, fmtData, fmtVoice, fmtSms } from "@/lib/plans";
 
 interface Props {
   plan: Plan;
@@ -111,7 +111,7 @@ export default function PlanCard({
         </div>
         <div className="spec-box">
           <p className="text-[10px] text-gray-400 mb-0.5">문자</p>
-          <p className="text-xs font-medium">{fmtVoice(plan.sms)}</p>
+          <p className="text-xs font-medium">{fmtSms(plan.sms)}</p>
         </div>
       </div>
 
