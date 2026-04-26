@@ -191,6 +191,14 @@ export function fmtSms(v: number | "unlimited") {
   return "-";
 }
 
+export function fmtThrottle(kbps: number) {
+  if (kbps >= 1000) {
+    const mbps = kbps / 1000;
+    return `${mbps % 1 === 0 ? mbps.toFixed(0) : mbps.toFixed(1)}Mbps`;
+  }
+  return `${kbps}Kbps`;
+}
+
 export function fmtContract(months: number) {
   return months === 0 ? "무약정" : `${months}개월`;
 }

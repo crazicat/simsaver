@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { Plan } from "@/lib/types";
-import { fmtFee, fmtData, fmtVoice, fmtSms, fmtContract } from "@/lib/plans";
+import { fmtFee, fmtData, fmtVoice, fmtSms, fmtThrottle, fmtContract } from "@/lib/plans";
 
 interface Props {
   plans: Plan[];
@@ -11,7 +11,7 @@ interface Props {
 const ROWS: [string, (p: Plan) => string][] = [
   ["월 요금",   (p) => fmtFee(p.monthlyFee)],
   ["데이터",    (p) => fmtData(p.data)],
-  ["소진 후",   (p) => p.data.throttledSpeed ? `${p.data.throttledSpeed}Kbps` : "—"],
+  ["소진 후",   (p) => p.data.throttledSpeed ? fmtThrottle(p.data.throttledSpeed) : "—"],
   ["통화",      (p) => fmtVoice(p.voice)],
   ["문자",      (p) => fmtSms(p.sms)],
   ["기반망",    (p) => p.mvno],

@@ -190,24 +190,6 @@ export default function FilterPanel({ filters, onChange }: Props) {
         </div>
       </div>
 
-      {/* 수집 현황 */}
-      <div className="filter-panel">
-        <p className="text-xs font-medium mb-3">수집 현황</p>
-        {["KT M모바일", "U+알뜰모바일", "스노우맨", "LG헬로모바일"].map(
-          (c) => (
-            <div
-              key={c}
-              className="flex items-center justify-between mb-2 last:mb-0"
-            >
-              <span className="text-xs text-gray-500">{c}</span>
-              <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-            </div>
-          )
-        )}
-        <p className="text-[11px] text-gray-400 mt-3">
-          마지막 수집: 03:00
-        </p>
-      </div>
     </aside>
   );
 }

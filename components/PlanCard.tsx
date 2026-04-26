@@ -1,6 +1,6 @@
 "use client";
 import { Plan } from "@/lib/types";
-import { fmtFee, fmtData, fmtVoice, fmtSms } from "@/lib/plans";
+import { fmtFee, fmtData, fmtVoice, fmtSms, fmtThrottle } from "@/lib/plans";
 
 interface Props {
   plan: Plan;
@@ -118,7 +118,7 @@ export default function PlanCard({
       {/* 소진 후 속도 */}
       {plan.data.throttledSpeed && plan.data.total !== "unlimited" && (
         <p className="text-[11px] text-gray-400 mb-2">
-          소진 후 {plan.data.throttledSpeed}Kbps
+          소진 후 {fmtThrottle(plan.data.throttledSpeed)}
         </p>
       )}
 
