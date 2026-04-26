@@ -94,3 +94,19 @@
 
 /* ── 모달 스크롤 방지 ── */
 body.modal-open { overflow: hidden; }
+
+/* ── 바텀시트 슬라이드 업 ── */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slide-up 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* ── 가로 스크롤바 숨기기 (데이터 칩) ── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── 헤더 높이 ── */
+.h-13 { height: 3.25rem; }
