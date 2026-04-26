@@ -178,11 +178,15 @@ export function fmtData(d: Plan["data"]) {
 }
 
 export function fmtVoice(v: number | "unlimited") {
-  return v === "unlimited" ? "무제한" : `${v}분`;
+  if (v === "unlimited") return "무제한";
+  if (v > 0) return `${v}분`;
+  return "-";
 }
 
 export function fmtSms(v: number | "unlimited") {
-  return v === "unlimited" ? "무제한" : (v > 0 ? `${v}건` : "0건");
+  if (v === "unlimited") return "무제한";
+  if (v > 0) return `${v}건`;
+  return "-";
 }
 
 export function fmtContract(months: number) {
