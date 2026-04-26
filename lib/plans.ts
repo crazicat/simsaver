@@ -14,6 +14,7 @@ interface DbPlan {
   voice_unlimited: boolean;
   voice_min: number | null;
   sms_unlimited: boolean;
+  sms_cnt?: number | null;
   benefits: string[];
   contract_months: number;
   url: string | null;
@@ -44,7 +45,7 @@ function dbToPlan(row: DbPlan): Plan {
       ? { total: "unlimited" }
       : { total: row.data_mb ?? 0, throttledSpeed: row.throttled_speed ?? undefined },
     voice: row.voice_unlimited ? "unlimited" : (row.voice_min ?? 0),
-    sms: row.sms_unlimited ? "unlimited" : 0,
+    sms: row.sms_unlimited ? "unlimited" : (row.sms_cnt ?? 0),
     benefits: row.benefits ?? [],
     contractMonths: row.contract_months,
     url: row.url ?? undefined,
