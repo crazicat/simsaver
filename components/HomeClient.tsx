@@ -88,7 +88,7 @@ export default function HomeClient({ plans }: { plans: Plan[] }) {
         <div className="max-w-screen-xl mx-auto px-4 h-13 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <span className="text-lg font-bold tracking-tight text-brand-800 dark:text-brand-100">
-              SIMsaver
+              알뜰폰갤러리
             </span>
             <span className="hidden sm:inline text-[11px] text-gray-400 bg-gray-100
                              dark:bg-gray-800 px-2 py-0.5 rounded-full">

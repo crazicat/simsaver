@@ -1,6 +1,6 @@
 {
-  "name": "SIMsaver — 알뜰폰 요금제 비교",
-  "short_name": "SIMsaver",
+  "name": "알뜰폰갤러리 — 알뜰폰 요금제 비교",
+  "short_name": "알뜰폰갤러리",
   "description": "알뜰폰 요금제를 자동 수집해 항상 최신 정보로 비교하세요",
   "start_url": "/",
   "display": "standalone",
