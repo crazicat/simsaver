@@ -17,14 +17,6 @@ const MVNO_BADGE: Record<string, string> = {
   "LGU+": "badge badge-lgu",
 };
 
-const CLICKABLE_CARRIERS = new Set([
-  "U+알뜰모바일",
-  "LG헬로모바일",
-  "스노우맨",
-  "핀다이렉트",
-  "우리원모바일",
-]);
-
 export default function PlanCard({
   plan,
   isFav,
@@ -33,7 +25,7 @@ export default function PlanCard({
   onCompare,
   compareDisabled,
 }: Props) {
-  const hasLink = !!plan.url && CLICKABLE_CARRIERS.has(plan.carrier);
+  const hasLink = !!plan.url;
 
   // 데이터 + 소진후 속도 통합 표시 ("7GB + 1Mbps" 형태)
   const dataDisplay = (() => {
