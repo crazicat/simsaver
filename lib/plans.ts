@@ -226,6 +226,7 @@ export function filterAndSort(
     if (filters.unlimitedVoice && p.voice !== "unlimited") return false;
     if (filters.noContract && p.contractMonths !== 0) return false;
     if (filters.network !== "ALL" && p.network !== filters.network) return false;
+    if (filters.dataUnlimited && p.data.total !== "unlimited") return false;
     return true;
   });
 
@@ -253,4 +254,5 @@ export const DEFAULT_FILTERS: FilterState = {
   unlimitedVoice: false,
   noContract: false,
   network: "ALL",
+  dataUnlimited: false,
 };

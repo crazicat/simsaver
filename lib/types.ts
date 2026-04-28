@@ -36,4 +36,5 @@ export interface FilterState {
   unlimitedVoice: boolean;
   noContract: boolean;
   network: "ALL" | "LTE" | "5G";
+  dataUnlimited: boolean;  // 데이터 완전무제한만 보기
 }

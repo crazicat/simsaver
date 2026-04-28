@@ -23,6 +23,46 @@ const DATA_CHIPS = [
   { label: "50GB+", value: 50 },
 ];
 
+type FilterPatch = Partial<import("@/lib/types").FilterState>;
+const THEME_CHIPS: Array<{
+  id: string;
+  emoji: string;
+  label: string;
+  patch: (active: boolean) => FilterPatch;
+  isActive: (f: import("@/lib/types").FilterState) => boolean;
+}> = [
+  {
+    id: "under10k",
+    emoji: "💰", label: "만원 이하",
+    patch: (on) => ({ maxFee: on ? 50000 : 10000 }),
+    isActive: (f) => f.maxFee <= 10000,
+  },
+  {
+    id: "unlimited_data",
+    emoji: "♾️", label: "데이터 무제한",
+    patch: (on) => ({ dataUnlimited: !on }),
+    isActive: (f) => f.dataUnlimited,
+  },
+  {
+    id: "5g",
+    emoji: "📶", label: "5G",
+    patch: (on) => ({ network: on ? "ALL" : "5G" }),
+    isActive: (f) => f.network === "5G",
+  },
+  {
+    id: "nocontract",
+    emoji: "🔓", label: "무약정",
+    patch: (on) => ({ noContract: !on }),
+    isActive: (f) => f.noContract,
+  },
+  {
+    id: "unlimited_voice",
+    emoji: "📞", label: "통화 무제한",
+    patch: (on) => ({ unlimitedVoice: !on }),
+    isActive: (f) => f.unlimitedVoice,
+  },
+];
+
 export default function HomeClient({ plans }: { plans: Plan[] }) {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [sort, setSort] = useState<SortKey>("fee_asc");
@@ -51,6 +91,7 @@ export default function HomeClient({ plans }: { plans: Plan[] }) {
     if (filters.noContract) count++;
     if (filters.network !== "ALL") count++;
     if (filters.search) count++;
+    if (filters.dataUnlimited) count++;
     return count;
   }, [filters]);
 
@@ -126,6 +167,27 @@ export default function HomeClient({ plans }: { plans: Plan[] }) {
           ))}
         </div>
 
+        {/* 테마 퀵필터 칩 */}
+        <div className="flex gap-1.5 px-4 py-2 overflow-x-auto no-scrollbar border-t border-gray-50 dark:border-gray-800">
+          {THEME_CHIPS.map((chip) => {
+            const active = chip.isActive(filters);
+            return (
+              <button
+                key={chip.id}
+                onClick={() => setFilters((f) => ({ ...f, ...chip.patch(active) }))}
+                className={`flex-shrink-0 inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full font-medium transition-all border
+                  ${active
+                    ? "bg-brand-800 text-white border-brand-800"
+                    : "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700"
+                  }`}
+              >
+                <span className="leading-none">{chip.emoji}</span>
+                <span>{chip.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* 필터 + 정렬 */}
         <div className="flex items-center justify-between px-4 py-2 border-t border-gray-50 dark:border-gray-800">
           <button
@@ -171,6 +233,27 @@ export default function HomeClient({ plans }: { plans: Plan[] }) {
 
         {/* ── 메인 콘텐츠 ── */}
         <main className="flex-1 min-w-0">
+          {/* 테마 퀵필터 칩 (데스크탑) */}
+          <div className="hidden sm:flex gap-2 mb-4 flex-wrap">
+            {THEME_CHIPS.map((chip) => {
+              const active = chip.isActive(filters);
+              return (
+                <button
+                  key={chip.id}
+                  onClick={() => setFilters((f) => ({ ...f, ...chip.patch(active) }))}
+                  className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium transition-all border
+                    ${active
+                      ? "bg-brand-800 text-white border-brand-800 shadow-sm"
+                      : "bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-brand-400 hover:text-brand-700"
+                    }`}
+                >
+                  <span className="leading-none">{chip.emoji}</span>
+                  <span>{chip.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
           {/* 결과 수 + 정렬 (데스크탑) */}
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-gray-500">
