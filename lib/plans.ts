@@ -66,23 +66,32 @@ export async function fetchPlansFromDb(): Promise<Plan[]> {
     return MOCK_PLANS;
   }
 
-  const { data, error } = await supabase
-    .from("plans")
-    .select("*")
-    .eq("is_active", true)
-    .order("monthly_fee", { ascending: true })
-    .limit(5000);  // Supabase 기본 1000행 제한 우회
+  // Supabase PostgREST max_rows=1000 하드캡 우회: range() 로 페이지네이션
+  const PAGE = 1000;
+  const allRows: DbPlan[] = [];
+  let from = 0;
 
-  if (error) {
-    console.error("Supabase fetch error:", error.message);
-    return MOCK_PLANS;
+  while (true) {
+    const { data, error } = await supabase
+      .from("plans")
+      .select("*")
+      .eq("is_active", true)
+      .order("monthly_fee", { ascending: true })
+      .range(from, from + PAGE - 1);
+
+    if (error) {
+      console.error("Supabase fetch error:", error.message);
+      break;
+    }
+
+    if (!data || data.length === 0) break;
+    allRows.push(...(data as DbPlan[]));
+    if (data.length < PAGE) break; // 마지막 페이지
+    from += PAGE;
   }
 
-  if (!data || data.length === 0) {
-    return MOCK_PLANS;
-  }
-
-  return (data as DbPlan[]).map(dbToPlan);
+  if (allRows.length === 0) return MOCK_PLANS;
+  return allRows.map(dbToPlan);
 }
 
 export const MOCK_PLANS: Plan[] = [
