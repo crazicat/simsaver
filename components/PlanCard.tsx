@@ -11,6 +11,27 @@ interface Props {
   compareDisabled: boolean;
 }
 
+/** 혜택 텍스트 키워드 → 이모지 아이콘 */
+function benefitIcon(text: string): string {
+  const t = text.toLowerCase();
+  if (/넷플릭스|netflix/.test(t))                    return "🎬";
+  if (/티빙|tving|왓챠|wavve|웨이브|시리즈on/.test(t)) return "📺";
+  if (/유튜브|youtube/.test(t))                       return "▶️";
+  if (/쿠팡/.test(t))                                 return "🛒";
+  if (/네이버페이|naver\s*pay/.test(t))               return "💚";
+  if (/카카오/.test(t))                               return "💛";
+  if (/지니|멜론|플로|뮤직|음악/.test(t))             return "🎵";
+  if (/밀리|독서|서재|책/.test(t))                    return "📚";
+  if (/해외.?로밍|로밍/.test(t))                      return "✈️";
+  if (/유심비|유심/.test(t))                          return "💳";
+  if (/즉시.?개통|바로.?개통/.test(t))                return "⚡";
+  if (/첫.?달|%\s*할인|\d+원\s*할인|이벤트/.test(t)) return "🎁";
+  if (/무약정/.test(t))                               return "🔓";
+  if (/완전.?무제한|데이터.?무제한/.test(t))           return "♾️";
+  if (/소진\s*후|kbps|mbps|속도/.test(t))             return "📶";
+  return "✓";
+}
+
 const MVNO_BADGE: Record<string, string> = {
   SKT: "badge badge-skt",
   KT: "badge badge-kt",
@@ -139,10 +160,12 @@ export default function PlanCard({
           {plan.benefits.slice(0, 2).map((b) => (
             <span
               key={b}
-              className="text-[10px] bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300
+              className="inline-flex items-center gap-0.5 text-[10px]
+                         bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300
                          px-2 py-0.5 rounded-full"
             >
-              {b}
+              <span className="text-[11px] leading-none">{benefitIcon(b)}</span>
+              <span>{b}</span>
             </span>
           ))}
         </div>
