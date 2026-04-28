@@ -70,7 +70,8 @@ export async function fetchPlansFromDb(): Promise<Plan[]> {
     .from("plans")
     .select("*")
     .eq("is_active", true)
-    .order("monthly_fee", { ascending: true });
+    .order("monthly_fee", { ascending: true })
+    .limit(5000);  // Supabase 기본 1000행 제한 우회
 
   if (error) {
     console.error("Supabase fetch error:", error.message);
@@ -226,7 +227,12 @@ export function filterAndSort(
     if (filters.unlimitedVoice && p.voice !== "unlimited") return false;
     if (filters.noContract && p.contractMonths !== 0) return false;
     if (filters.network !== "ALL" && p.network !== filters.network) return false;
-    if (filters.dataUnlimited && p.data.total !== "unlimited") return false;
+    // 데이터 무제한: 완전무제한 OR 소진 후 속도 제공(QoS) 요금제 포함
+    if (filters.dataUnlimited) {
+      const isEffectivelyUnlimited =
+        p.data.total === "unlimited" || p.data.throttledSpeed != null;
+      if (!isEffectivelyUnlimited) return false;
+    }
     return true;
   });
 
