@@ -23,6 +23,23 @@ const DATA_CHIPS = [
   { label: "50GB+", value: 50 },
 ];
 
+// ── 망 탭 ──────────────────────────────────────────────────────
+const MVNO_TABS = [
+  { label: "전체",  value: null,      activeClass: "bg-brand-800 text-white border-brand-800" },
+  { label: "SKT",   value: "SKT"  as const, activeClass: "bg-red-600   text-white border-red-600" },
+  { label: "KT",    value: "KT"   as const, activeClass: "bg-amber-500 text-white border-amber-500" },
+  { label: "LGU+",  value: "LGU+" as const, activeClass: "bg-purple-600 text-white border-purple-600" },
+] as const;
+
+// ── 데이터 사용량 가이드 ──────────────────────────────────────
+const DATA_GUIDE = [
+  { emoji: "💬", label: "가끔 써요",   desc: "카톡·문자 위주",  minDataGb:  0, maxFee: 12000, unlimited: false },
+  { emoji: "📱", label: "조금 써요",   desc: "SNS·검색·지도",   minDataGb:  3, maxFee: 22000, unlimited: false },
+  { emoji: "🎬", label: "많이 써요",   desc: "유튜브·동영상",   minDataGb: 10, maxFee: 35000, unlimited: false },
+  { emoji: "🎮", label: "헤비 유저",   desc: "게임·라이브",     minDataGb: 20, maxFee: 50000, unlimited: false },
+  { emoji: "♾️", label: "무제한",      desc: "제한 없이 자유롭게", minDataGb: 0, maxFee: 50000, unlimited: true  },
+] as const;
+
 type FilterPatch = Partial<import("@/lib/types").FilterState>;
 const THEME_CHIPS: Array<{
   id: string;
@@ -120,6 +137,19 @@ export default function HomeClient({ plans }: { plans: Plan[] }) {
         : prev
     );
   }, []);
+
+  // 현재 활성 망 탭 (단일 선택이면 해당 값, 아니면 null = 전체)
+  const activeMvnoTab = filters.mvno.length === 1 ? filters.mvno[0] : null;
+  const setMvnoTab = useCallback((v: "SKT" | "KT" | "LGU+" | null) => {
+    setFilters(f => ({
+      ...f,
+      mvno: v && activeMvnoTab !== v ? [v] : [],
+    }));
+  }, [activeMvnoTab]);
+
+  // 데이터 사용량 가이드: 데이터/가격 필터가 기본값일 때만 표시
+  const showDataGuide =
+    filters.minDataGb === 0 && !filters.dataUnlimited && filters.maxFee >= 50000;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -233,6 +263,63 @@ export default function HomeClient({ plans }: { plans: Plan[] }) {
 
         {/* ── 메인 콘텐츠 ── */}
         <main className="flex-1 min-w-0">
+          {/* ── 망 탭 (모바일·데스크탑 공통) ── */}
+          <div className="flex gap-1.5 mb-4">
+            {MVNO_TABS.map((tab) => {
+              const isActive = tab.value === null
+                ? activeMvnoTab === null
+                : activeMvnoTab === tab.value;
+              return (
+                <button
+                  key={tab.label}
+                  onClick={() => setMvnoTab(tab.value ?? null)}
+                  className={`flex-1 sm:flex-none text-xs font-semibold px-4 py-2 rounded-xl border transition-all
+                    ${isActive
+                      ? tab.activeClass
+                      : "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300"
+                    }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* ── 데이터 사용량 가이드 ── */}
+          {showDataGuide && (
+            <div className="mb-5">
+              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2.5">
+                데이터 얼마나 쓰세요?
+              </p>
+              <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                {DATA_GUIDE.map((g) => (
+                  <button
+                    key={g.label}
+                    onClick={() =>
+                      setFilters(f => ({
+                        ...f,
+                        minDataGb: g.minDataGb,
+                        maxFee: g.maxFee,
+                        dataUnlimited: g.unlimited,
+                      }))
+                    }
+                    className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl border border-gray-200
+                               dark:border-gray-700 bg-white dark:bg-gray-900
+                               hover:border-brand-400 hover:shadow-sm transition-all group text-center"
+                  >
+                    <span className="text-xl sm:text-2xl leading-none">{g.emoji}</span>
+                    <span className="text-[11px] sm:text-xs font-semibold text-gray-700 dark:text-gray-300 group-hover:text-brand-700">
+                      {g.label}
+                    </span>
+                    <span className="hidden sm:block text-[10px] text-gray-400 leading-tight">
+                      {g.desc}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* 테마 퀵필터 칩 (데스크탑) */}
           <div className="hidden sm:flex gap-2 mb-4 flex-wrap">
             {THEME_CHIPS.map((chip) => {
