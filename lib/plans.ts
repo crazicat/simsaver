@@ -213,6 +213,19 @@ export function fmtContract(months: number) {
   return months === 0 ? "무약정" : `${months}개월`;
 }
 
+/**
+ * 12개월 납부 총액 계산
+ * - promoMonths 있으면: 할인가 × promoMonths + 정상가 × (12 - promoMonths)
+ * - 없으면 (영구 할인 or 단일가): monthlyFee × 12
+ */
+export function calcAnnualFee(plan: Plan): number {
+  const { monthlyFee, originalFee, promoMonths } = plan;
+  if (promoMonths && promoMonths > 0 && promoMonths < 12 && originalFee && originalFee > monthlyFee) {
+    return monthlyFee * promoMonths + originalFee * (12 - promoMonths);
+  }
+  return monthlyFee * 12;
+}
+
 export function dataToGb(d: Plan["data"]): number {
   return d.total === "unlimited" ? Infinity : d.total / 1024;
 }

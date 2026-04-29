@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { Plan, SortKey } from "@/lib/types";
-import { filterAndSort, DEFAULT_FILTERS } from "@/lib/plans";
+import { filterAndSort, DEFAULT_FILTERS, calcAnnualFee } from "@/lib/plans";
 import PlanCard from "@/components/PlanCard";
 import FilterPanel from "@/components/FilterPanel";
 import CompareModal from "@/components/CompareModal";
@@ -87,6 +87,7 @@ export default function HomeClient({ plans }: { plans: Plan[] }) {
   const [compare, setCompare] = useState<string[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [showMobileFilter, setShowMobileFilter] = useState(false);
+  const [showAnnual, setShowAnnual] = useState(false);
 
   const filtered = useMemo(
     () => filterAndSort(plans, filters, sort),
@@ -237,19 +238,31 @@ export default function HomeClient({ plans }: { plans: Plan[] }) {
             )}
           </button>
 
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as SortKey)}
-            className="text-xs border border-gray-200 dark:border-gray-700 rounded-lg
-                       px-2 py-1.5 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300
-                       outline-none cursor-pointer"
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowAnnual(v => !v)}
+              className={`flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg border font-medium transition-all
+                ${showAnnual
+                  ? "bg-brand-800 text-white border-brand-800"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700"
+                }`}
+            >
+              12개월 총액
+            </button>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortKey)}
+              className="text-xs border border-gray-200 dark:border-gray-700 rounded-lg
+                         px-2 py-1.5 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300
+                         outline-none cursor-pointer"
+            >
+              {SORT_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -349,19 +362,32 @@ export default function HomeClient({ plans }: { plans: Plan[] }) {
               </span>
               <span className="ml-0.5">개 요금제</span>
             </p>
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value as SortKey)}
-              className="hidden sm:block text-sm border border-gray-200 dark:border-gray-700 rounded-xl
-                         px-3 py-1.5 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300
-                         outline-none cursor-pointer"
-            >
-              {SORT_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
+            <div className="hidden sm:flex items-center gap-2">
+              <button
+                onClick={() => setShowAnnual(v => !v)}
+                className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl border font-medium transition-all
+                  ${showAnnual
+                    ? "bg-brand-800 text-white border-brand-800 shadow-sm"
+                    : "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-brand-400"
+                  }`}
+              >
+                <span className="leading-none">📅</span>
+                <span>12개월 납부총액</span>
+              </button>
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortKey)}
+                className="text-sm border border-gray-200 dark:border-gray-700 rounded-xl
+                           px-3 py-1.5 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300
+                           outline-none cursor-pointer"
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* 카드 그리드 */}
@@ -376,6 +402,8 @@ export default function HomeClient({ plans }: { plans: Plan[] }) {
                   compareDisabled={compare.length >= 3}
                   onFav={() => toggleFav(plan.id)}
                   onCompare={() => toggleCompare(plan.id)}
+                  showAnnual={showAnnual}
+                  annualFee={calcAnnualFee(plan)}
                 />
               ))}
             </div>

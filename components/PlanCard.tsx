@@ -9,6 +9,8 @@ interface Props {
   onFav: () => void;
   onCompare: () => void;
   compareDisabled: boolean;
+  showAnnual?: boolean;
+  annualFee?: number;
 }
 
 /** 혜택 텍스트 키워드 → 이모지 아이콘 */
@@ -45,6 +47,8 @@ export default function PlanCard({
   onFav,
   onCompare,
   compareDisabled,
+  showAnnual = false,
+  annualFee,
 }: Props) {
   const hasLink = !!plan.url;
 
@@ -118,6 +122,14 @@ export default function PlanCard({
         {plan.promoMonths && plan.originalFee && plan.originalFee > plan.monthlyFee && (
           <p className="text-[10px] text-gray-400 mt-0.5">
             {plan.promoMonths}개월 이후 {fmtFee(plan.originalFee)}
+          </p>
+        )}
+        {showAnnual && annualFee != null && (
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 font-medium">
+            12개월 총{" "}
+            <span className="text-brand-700 dark:text-brand-300 font-semibold">
+              {fmtFee(annualFee)}
+            </span>
           </p>
         )}
       </div>
