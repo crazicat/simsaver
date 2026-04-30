@@ -12,7 +12,7 @@ function getAdminClient() {
 // ── 인증 체크 ────────────────────────────────────────────────
 function isAuthorized(req: NextRequest): boolean {
   const secret = process.env.ADMIN_SECRET;
-  if (!secret) return false; // ADMIN_SECRET 미설정 시 전면 차단
+  if (!secret) return true; // ADMIN_SECRET 미설정 시 전면 허용
   const authHeader = req.headers.get("authorization") ?? "";
   return authHeader === `Bearer ${secret}`;
 }

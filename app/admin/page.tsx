@@ -36,10 +36,6 @@ const EMPTY_FORM: Omit<BannerRow, "id" | "created_at"> = {
 
 // ── 컴포넌트 ──────────────────────────────────────────────────────
 export default function AdminPage() {
-  const [secret, setSecret]     = useState("");
-  const [token, setToken]       = useState<string | null>(null);
-  const [authError, setAuthError] = useState("");
-
   const [banners, setBanners]   = useState<BannerRow[]>([]);
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState("");
@@ -50,12 +46,6 @@ export default function AdminPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // sessionStorage에서 토큰 복원
-  useEffect(() => {
-    const saved = sessionStorage.getItem("admin_token");
-    if (saved) setToken(saved);
-  }, []);
-
   // ── API 헬퍼 ────────────────────────────────────────────────
   const apiFetch = useCallback(
     (path: string, opts?: RequestInit) =>
@@ -63,16 +53,14 @@ export default function AdminPage() {
         ...opts,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
           ...(opts?.headers ?? {}),
         },
       }),
-    [token]
+    []
   );
 
   // ── 배너 목록 로드 ──────────────────────────────────────────
   const loadBanners = useCallback(async () => {
-    if (!token) return;
     setLoading(true);
     setError("");
     try {
@@ -85,26 +73,11 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [token, apiFetch]);
+  }, [apiFetch]);
 
   useEffect(() => {
-    if (token) loadBanners();
-  }, [token, loadBanners]);
-
-  // ── 로그인 ──────────────────────────────────────────────────
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setAuthError("");
-    const res = await fetch("/api/admin/banners", {
-      headers: { Authorization: `Bearer ${secret}` },
-    });
-    if (res.ok) {
-      sessionStorage.setItem("admin_token", secret);
-      setToken(secret);
-    } else {
-      setAuthError("비밀번호가 틀렸습니다.");
-    }
-  }
+    loadBanners();
+  }, [loadBanners]);
 
   // ── 폼 핸들러 ───────────────────────────────────────────────
   function handleEdit(b: BannerRow) {
@@ -182,33 +155,6 @@ export default function AdminPage() {
     }
   }
 
-  // ── 로그인 화면 ─────────────────────────────────────────────
-  if (!token) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <form onSubmit={handleLogin}
-              className="bg-white rounded-2xl shadow-md p-8 w-full max-w-sm space-y-4">
-          <h1 className="text-xl font-bold text-gray-800">관리자 로그인</h1>
-          <input
-            type="password"
-            value={secret}
-            onChange={(e) => setSecret(e.target.value)}
-            placeholder="Admin Secret"
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none
-                       focus:ring-2 focus:ring-brand-500"
-            required
-          />
-          {authError && <p className="text-red-500 text-xs">{authError}</p>}
-          <button type="submit"
-                  className="w-full bg-brand-800 hover:bg-brand-700 text-white rounded-xl py-2.5
-                             text-sm font-semibold transition-colors">
-            로그인
-          </button>
-        </form>
-      </div>
-    );
-  }
-
   // ── 관리자 UI ────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-50">
@@ -221,12 +167,7 @@ export default function AdminPage() {
               관리자
             </span>
           </div>
-          <button
-            onClick={() => { sessionStorage.removeItem("admin_token"); setToken(null); }}
-            className="text-xs text-gray-400 hover:text-gray-600"
-          >
-            로그아웃
-          </button>
+          <a href="/" className="text-xs text-gray-400 hover:text-gray-600">← 메인으로</a>
         </div>
       </header>
 
