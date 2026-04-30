@@ -120,6 +120,8 @@ export default function AdminPage() {
       setEditId(null);
       setForm(EMPTY_FORM);
       await loadBanners();
+      // 저장 즉시 사이트 캐시 갱신
+      await fetch("/api/admin/revalidate", { method: "POST" });
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -135,6 +137,7 @@ export default function AdminPage() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setDeleteId(null);
       await loadBanners();
+      await fetch("/api/admin/revalidate", { method: "POST" });
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -150,6 +153,7 @@ export default function AdminPage() {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       await loadBanners();
+      await fetch("/api/admin/revalidate", { method: "POST" });
     } catch (e) {
       setError((e as Error).message);
     }
@@ -167,7 +171,20 @@ export default function AdminPage() {
               관리자
             </span>
           </div>
-          <a href="/" className="text-xs text-gray-400 hover:text-gray-600">← 메인으로</a>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={async () => {
+                const res = await fetch("/api/admin/revalidate", { method: "POST" });
+                if (res.ok) alert("✅ 사이트에 반영되었습니다!");
+                else alert("반영 실패");
+              }}
+              className="text-xs bg-brand-800 hover:bg-brand-700 text-white px-3 py-1.5
+                         rounded-lg font-medium transition-colors"
+            >
+              사이트 반영
+            </button>
+            <a href="/" className="text-xs text-gray-400 hover:text-gray-600">← 메인으로</a>
+          </div>
         </div>
       </header>
 
