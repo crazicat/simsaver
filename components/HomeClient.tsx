@@ -9,6 +9,8 @@ import CompareModal from "@/components/CompareModal";
 import BannerHero from "@/components/BannerHero";
 import BannerInline from "@/components/BannerInline";
 import BannerSidebar from "@/components/BannerSidebar";
+import DcWidget from "@/components/DcWidget";
+import { DcPost } from "@/lib/dcinside";
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: "fee_asc",   label: "요금 낮은순" },
@@ -84,7 +86,15 @@ const THEME_CHIPS: Array<{
   },
 ];
 
-export default function HomeClient({ plans, banners = [] }: { plans: Plan[]; banners?: Banner[] }) {
+export default function HomeClient({
+  plans,
+  banners = [],
+  dcPosts = [],
+}: {
+  plans: Plan[];
+  banners?: Banner[];
+  dcPosts?: DcPost[];
+}) {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [sort, setSort] = useState<SortKey>("fee_asc");
   const [favs, setFavs] = useState<Set<string>>(new Set());
@@ -281,6 +291,7 @@ export default function HomeClient({ plans, banners = [] }: { plans: Plan[]; ban
           <div className="sticky top-[72px]">
             <FilterPanel filters={filters} onChange={setFilters} />
             {sidebarBanner && <BannerSidebar banner={sidebarBanner} />}
+            <DcWidget posts={dcPosts} />
           </div>
         </div>
 
