@@ -1,6 +1,18 @@
 import { Plan, FilterState, SortKey } from "./types";
 import { supabase } from "./supabase";
 
+// ── UTM 파라미터 삽입 ─────────────────────────────────────────
+function addUtm(rawUrl: string): string {
+  try {
+    const u = new URL(rawUrl);
+    u.searchParams.set("utm_source", "MVNOGALLERY");
+    return u.toString();
+  } catch {
+    // 파싱 불가능한 URL(상대경로 등)은 원본 유지
+    return rawUrl;
+  }
+}
+
 // ── Supabase DB row 타입 ──────────────────────────────────
 interface DbPlan {
   id: string;
@@ -49,7 +61,7 @@ function dbToPlan(row: DbPlan): Plan {
     sms: row.sms_unlimited ? "unlimited" : (row.sms_cnt ?? 0),
     benefits: row.benefits ?? [],
     contractMonths: row.contract_months,
-    url: row.url ?? undefined,
+    url: row.url ? addUtm(row.url) : undefined,
     lastUpdated: row.last_crawled_at
       ? row.last_crawled_at.slice(0, 10)
       : new Date().toISOString().slice(0, 10),

@@ -1,10 +1,14 @@
 "use client";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Plan, SortKey } from "@/lib/types";
+import { Banner } from "@/lib/banners";
 import { filterAndSort, DEFAULT_FILTERS, calcAnnualFee } from "@/lib/plans";
 import PlanCard from "@/components/PlanCard";
 import FilterPanel from "@/components/FilterPanel";
 import CompareModal from "@/components/CompareModal";
+import BannerHero from "@/components/BannerHero";
+import BannerInline from "@/components/BannerInline";
+import BannerSidebar from "@/components/BannerSidebar";
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: "fee_asc",   label: "요금 낮은순" },
@@ -80,7 +84,7 @@ const THEME_CHIPS: Array<{
   },
 ];
 
-export default function HomeClient({ plans }: { plans: Plan[] }) {
+export default function HomeClient({ plans, banners = [] }: { plans: Plan[]; banners?: Banner[] }) {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [sort, setSort] = useState<SortKey>("fee_asc");
   const [favs, setFavs] = useState<Set<string>>(new Set());
@@ -93,6 +97,11 @@ export default function HomeClient({ plans }: { plans: Plan[] }) {
     () => filterAndSort(plans, filters, sort),
     [plans, filters, sort]
   );
+
+  // ── 배너 슬롯 ───────────────────────────────────────────────
+  const heroBanner    = banners.find((b) => b.position === "hero");
+  const midBanners    = banners.filter((b) => b.position === "mid_grid");
+  const sidebarBanner = banners.find((b) => b.position === "sidebar");
 
   const comparePlans = plans.filter((p) => compare.includes(p.id));
 
@@ -271,11 +280,15 @@ export default function HomeClient({ plans }: { plans: Plan[] }) {
         <div className="hidden sm:block">
           <div className="sticky top-[72px]">
             <FilterPanel filters={filters} onChange={setFilters} />
+            {sidebarBanner && <BannerSidebar banner={sidebarBanner} />}
           </div>
         </div>
 
         {/* ── 메인 콘텐츠 ── */}
         <main className="flex-1 min-w-0">
+          {/* ── 히어로 배너 ── */}
+          {heroBanner && <BannerHero banner={heroBanner} />}
+
           {/* ── 망 탭 (모바일·데스크탑 공통) ── */}
           <div className="flex gap-1.5 mb-4">
             {MVNO_TABS.map((tab) => {
@@ -393,18 +406,23 @@ export default function HomeClient({ plans }: { plans: Plan[] }) {
           {/* 카드 그리드 */}
           {filtered.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {filtered.map((plan) => (
-                <PlanCard
-                  key={plan.id}
-                  plan={plan}
-                  isFav={favs.has(plan.id)}
-                  inCompare={compare.includes(plan.id)}
-                  compareDisabled={compare.length >= 3}
-                  onFav={() => toggleFav(plan.id)}
-                  onCompare={() => toggleCompare(plan.id)}
-                  showAnnual={showAnnual}
-                  annualFee={calcAnnualFee(plan)}
-                />
+              {filtered.map((plan, idx) => (
+                <React.Fragment key={plan.id}>
+                  {/* mid_grid 배너: 5번째 카드 앞에 삽입 */}
+                  {idx === 5 && midBanners.map((b) => (
+                    <BannerInline key={`mid-${b.id}`} banner={b} />
+                  ))}
+                  <PlanCard
+                    plan={plan}
+                    isFav={favs.has(plan.id)}
+                    inCompare={compare.includes(plan.id)}
+                    compareDisabled={compare.length >= 3}
+                    onFav={() => toggleFav(plan.id)}
+                    onCompare={() => toggleCompare(plan.id)}
+                    showAnnual={showAnnual}
+                    annualFee={calcAnnualFee(plan)}
+                  />
+                </React.Fragment>
               ))}
             </div>
           ) : (
