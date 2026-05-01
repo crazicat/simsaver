@@ -20,6 +20,7 @@ interface PlanRow {
   contract_months: number;
   url: string | null;
   is_active: boolean;
+  crawler_protected: boolean;
   original_fee: number | null;
   promo_months: number | null;
   promo_text: string | null;
@@ -45,6 +46,7 @@ const EMPTY_FORM: FormData = {
   contract_months: 0,
   url: null,
   is_active: true,
+  crawler_protected: false,
   original_fee: null,
   promo_months: null,
   promo_text: null,
@@ -233,6 +235,7 @@ export default function PlansAdminPage() {
       contract_months: p.contract_months,
       url: p.url,
       is_active: p.is_active,
+      crawler_protected: p.crawler_protected ?? false,
       original_fee: p.original_fee,
       promo_months: p.promo_months,
       promo_text: p.promo_text,
@@ -288,6 +291,21 @@ export default function PlansAdminPage() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       await loadPlans();
       await fetch("/api/admin/revalidate", { method: "POST" });
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  // ── 크롤링 보호 토글 ─────────────────────────────────────────
+  async function handleToggleProtected(p: PlanRow) {
+    try {
+      const res = await fetch(`/api/admin/plans?id=${p.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ crawler_protected: !p.crawler_protected }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await loadPlans();
     } catch (e) {
       setError((e as Error).message);
     }
@@ -405,20 +423,23 @@ export default function PlansAdminPage() {
                   <th className="text-center px-4 py-3">약정</th>
                   <th className="text-center px-4 py-3">URL</th>
                   <th className="text-center px-4 py-3">상태</th>
+                  <th className="text-center px-3 py-3" title="크롤링 보호 ON = 자동 크롤링으로 수정 안 됨">
+                    🔒 보호
+                  </th>
                   <th className="text-center px-4 py-3">수정</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {loading && (
                   <tr>
-                    <td colSpan={10} className="text-center py-16 text-gray-400">
+                    <td colSpan={11} className="text-center py-16 text-gray-400">
                       불러오는 중…
                     </td>
                   </tr>
                 )}
                 {!loading && plans.length === 0 && (
                   <tr>
-                    <td colSpan={10} className="text-center py-16 text-gray-400">
+                    <td colSpan={11} className="text-center py-16 text-gray-400">
                       검색 결과가 없습니다.
                     </td>
                   </tr>
@@ -426,7 +447,9 @@ export default function PlansAdminPage() {
                 {plans.map((p) => (
                   <tr
                     key={p.id}
-                    className={`hover:bg-gray-50 transition-colors ${!p.is_active ? "opacity-40" : ""}`}
+                    className={`hover:bg-gray-50 transition-colors
+                      ${!p.is_active ? "opacity-40" : ""}
+                      ${p.crawler_protected ? "bg-amber-50/60" : ""}`}
                   >
                     {/* 통신사 */}
                     <td className="px-4 py-3">
@@ -441,7 +464,14 @@ export default function PlansAdminPage() {
                     </td>
                     {/* 요금제명 */}
                     <td className="px-4 py-3 max-w-[160px]">
-                      <span className="text-xs text-gray-800 line-clamp-2">{p.name}</span>
+                      <div className="flex items-start gap-1">
+                        <span className="text-xs text-gray-800 line-clamp-2">{p.name}</span>
+                        {p.crawler_protected && (
+                          <span className="flex-shrink-0 text-[10px] text-amber-600 font-bold" title="크롤링 보호 중">
+                            🔒
+                          </span>
+                        )}
+                      </div>
                       {p.promo_text && (
                         <span className="block text-[10px] text-rose-500 font-medium mt-0.5">
                           {p.promo_text}
@@ -512,6 +542,19 @@ export default function PlansAdminPage() {
                         {p.is_active ? "활성" : "비활성"}
                       </button>
                     </td>
+                    {/* 🔒 보호 토글 */}
+                    <td className="px-3 py-3 text-center">
+                      <button
+                        onClick={() => handleToggleProtected(p)}
+                        title={p.crawler_protected
+                          ? "보호 중 — 클릭하면 크롤링 허용으로 변경"
+                          : "클릭하면 크롤링으로부터 보호"}
+                        className={`text-lg leading-none transition-all hover:scale-110 active:scale-95
+                          ${p.crawler_protected ? "opacity-100" : "opacity-20 hover:opacity-60"}`}
+                      >
+                        🔒
+                      </button>
+                    </td>
                     {/* 수정 */}
                     <td className="px-4 py-3 text-center">
                       <button
@@ -569,9 +612,17 @@ export default function PlansAdminPage() {
             <div className="flex items-center justify-between px-6 py-4
                             border-b border-gray-100 flex-shrink-0">
               <div>
-                <h2 className="font-bold text-gray-800">
-                  {isNew ? "새 요금제 등록" : "요금제 수정"}
-                </h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="font-bold text-gray-800">
+                    {isNew ? "새 요금제 등록" : "요금제 수정"}
+                  </h2>
+                  {!isNew && editPlan?.crawler_protected && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full
+                                     bg-amber-100 text-amber-700">
+                      🔒 크롤링 보호 중
+                    </span>
+                  )}
+                </div>
                 {!isNew && editPlan && (
                   <p className="text-xs text-gray-400 mt-0.5">
                     {editPlan.carrier_name} · {editPlan.name}
@@ -659,6 +710,30 @@ export default function PlansAdminPage() {
                       <span className="text-sm text-gray-700">활성화 (사이트 노출)</span>
                     </label>
                   </div>
+                </div>
+
+                {/* 크롤링 보호 */}
+                <div className={`mt-3 rounded-xl px-4 py-3 border transition-colors
+                  ${form.crawler_protected
+                    ? "bg-amber-50 border-amber-200"
+                    : "bg-gray-50 border-gray-100"}`}>
+                  <label className="flex items-start gap-3 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={form.crawler_protected}
+                      onChange={(e) => sf({ crawler_protected: e.target.checked })}
+                      className="w-4 h-4 rounded accent-amber-500 mt-0.5 flex-shrink-0"
+                    />
+                    <div>
+                      <span className="text-sm font-semibold text-gray-800">
+                        🔒 크롤링 보호
+                      </span>
+                      <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed">
+                        체크 시, 자동 크롤링이 실행돼도 이 요금제의 데이터와 활성 상태가
+                        덮어씌워지지 않습니다. 수동으로 수정한 URL, 요금, 혜택 등을 유지할 때 사용하세요.
+                      </p>
+                    </div>
+                  </label>
                 </div>
               </section>
 
