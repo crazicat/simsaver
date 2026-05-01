@@ -166,11 +166,20 @@ export default function AdminPage() {
       <header className="bg-white border-b border-gray-100 sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="font-bold text-brand-800">알뜰폰갤러리</span>
+            <a href="/" className="font-bold text-brand-800">알뜰폰갤러리</a>
             <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
               관리자
             </span>
           </div>
+          <nav className="flex items-center gap-1 mx-4">
+            <span className="text-xs px-3 py-1.5 rounded-lg bg-brand-50 text-brand-700 font-semibold">
+              배너 관리
+            </span>
+            <a href="/admin/plans"
+               className="text-xs px-3 py-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
+              요금제 관리
+            </a>
+          </nav>
           <div className="flex items-center gap-3">
             <button
               onClick={async () => {
