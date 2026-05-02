@@ -34,8 +34,8 @@ export async function GET(req: NextRequest) {
       .select(
         "id,carrier_name,mvno,network,name,monthly_fee,data_mb,data_unlimited," +
         "throttled_speed,voice_unlimited,voice_min,sms_unlimited,sms_cnt," +
-        "benefits,contract_months,url,is_active,original_fee,promo_months," +
-        "promo_text,last_crawled_at",
+        "benefits,contract_months,url,is_active,crawler_protected,original_fee," +
+        "promo_months,promo_text,last_crawled_at",
         { count: "exact" }
       );
 
