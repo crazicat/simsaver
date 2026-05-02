@@ -98,6 +98,14 @@ export default function HomeClient({
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [sort, setSort] = useState<SortKey>("fee_asc");
   const [favs, setFavs] = useState<Set<string>>(new Set());
+
+  // localStorage 즐겨찾기 복원
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("simsaver_favs");
+      if (stored) setFavs(new Set(JSON.parse(stored)));
+    } catch { /* ignore */ }
+  }, []);
   const [compare, setCompare] = useState<string[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [showMobileFilter, setShowMobileFilter] = useState(false);
@@ -144,6 +152,7 @@ export default function HomeClient({
     setFavs((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
+      try { localStorage.setItem("simsaver_favs", JSON.stringify([...next])); } catch { /* ignore */ }
       return next;
     });
   }, []);
@@ -197,91 +206,60 @@ export default function HomeClient({
         </div>
       </header>
 
-      {/* ── 모바일: 빠른 데이터 칩 + 필터/정렬 바 ── */}
+      {/* ── 모바일: 데이터칩 + 필터/정렬 (2줄 → 1줄 통합) ── */}
       <div className="sm:hidden sticky top-[52px] z-20 bg-white dark:bg-gray-900
                        border-b border-gray-100 dark:border-gray-800">
-        {/* 데이터 칩 스크롤 */}
-        <div className="flex gap-1.5 px-4 py-2.5 overflow-x-auto no-scrollbar">
-          {DATA_CHIPS.map((chip) => (
-            <button
-              key={chip.value}
-              onClick={() => setFilters((f) => ({ ...f, minDataGb: chip.value }))}
-              className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-medium transition-all
-                ${filters.minDataGb === chip.value
-                  ? "bg-brand-800 text-white shadow-sm"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
-                }`}
-            >
-              {chip.label}
-            </button>
-          ))}
-        </div>
-
-        {/* 테마 퀵필터 칩 */}
-        <div className="flex gap-1.5 px-4 py-2 overflow-x-auto no-scrollbar border-t border-gray-50 dark:border-gray-800">
-          {THEME_CHIPS.map((chip) => {
-            const active = chip.isActive(filters);
-            return (
+        {/* 단일 행: [데이터칩 스크롤] [필터뱃지] [정렬] */}
+        <div className="flex items-center gap-2 px-3 py-2">
+          {/* 데이터 칩 — flex-shrink 영역 */}
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar flex-1 min-w-0">
+            {DATA_CHIPS.map((chip) => (
               <button
-                key={chip.id}
-                onClick={() => setFilters((f) => ({ ...f, ...chip.patch(active) }))}
-                className={`flex-shrink-0 inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full font-medium transition-all border
-                  ${active
-                    ? "bg-brand-800 text-white border-brand-800"
-                    : "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700"
+                key={chip.value}
+                onClick={() => setFilters((f) => ({ ...f, minDataGb: chip.value }))}
+                className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-medium transition-all
+                  ${filters.minDataGb === chip.value
+                    ? "bg-brand-800 text-white"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
                   }`}
               >
-                <span className="leading-none">{chip.emoji}</span>
-                <span>{chip.label}</span>
+                {chip.label}
               </button>
-            );
-          })}
-        </div>
+            ))}
+          </div>
 
-        {/* 필터 + 정렬 */}
-        <div className="flex items-center justify-between px-4 py-2 border-t border-gray-50 dark:border-gray-800">
+          {/* 구분선 */}
+          <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
+
+          {/* 필터 버튼 */}
           <button
             onClick={() => setShowMobileFilter(true)}
-            className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400
-                       bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg font-medium"
+            className="flex-shrink-0 flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400
+                       bg-gray-100 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg font-medium"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
-            필터
-            {activeFilterCount > 0 && (
+            {activeFilterCount > 0 ? (
               <span className="bg-brand-600 text-white text-[10px] w-4 h-4 rounded-full
-                               flex items-center justify-center font-bold">
+                               flex items-center justify-center font-bold leading-none">
                 {activeFilterCount}
               </span>
-            )}
+            ) : "필터"}
           </button>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowAnnual(v => !v)}
-              className={`flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg border font-medium transition-all
-                ${showAnnual
-                  ? "bg-brand-800 text-white border-brand-800"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700"
-                }`}
-            >
-              12개월 총액
-            </button>
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value as SortKey)}
-              className="text-xs border border-gray-200 dark:border-gray-700 rounded-lg
-                         px-2 py-1.5 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300
-                         outline-none cursor-pointer"
-            >
-              {SORT_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* 정렬 */}
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortKey)}
+            className="flex-shrink-0 text-xs border border-gray-200 dark:border-gray-700 rounded-lg
+                       px-2 py-1.5 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300
+                       outline-none cursor-pointer"
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
         </div>
       </div>
 

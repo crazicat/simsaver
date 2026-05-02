@@ -39,6 +39,29 @@ const MVNO_BADGE: Record<string, string> = {
   "LGU+": "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
 };
 
+type FilterPatch = Partial<FilterState>;
+const QUICK_CHIPS: Array<{
+  id: string; emoji: string; label: string;
+  patch: (active: boolean) => FilterPatch;
+  isActive: (f: FilterState) => boolean;
+}> = [
+  { id: "under10k",       emoji: "💰", label: "만원 이하",
+    patch: (on) => ({ maxFee: on ? 50000 : 10000 }),
+    isActive: (f) => f.maxFee <= 10000 },
+  { id: "unlimited_data", emoji: "♾️", label: "데이터 무제한",
+    patch: (on) => ({ dataUnlimited: !on }),
+    isActive: (f) => f.dataUnlimited },
+  { id: "5g",             emoji: "📶", label: "5G",
+    patch: (on) => ({ network: on ? "ALL" : "5G" }),
+    isActive: (f) => f.network === "5G" },
+  { id: "nocontract",     emoji: "🔓", label: "무약정",
+    patch: (on) => ({ noContract: !on }),
+    isActive: (f) => f.noContract },
+  { id: "unlimited_voice",emoji: "📞", label: "통화 무제한",
+    patch: (on) => ({ unlimitedVoice: !on }),
+    isActive: (f) => f.unlimitedVoice },
+];
+
 function FilterContent({ filters, onChange }: { filters: FilterState; onChange: (f: FilterState) => void }) {
   const set = (patch: Partial<FilterState>) =>
     onChange({ ...filters, ...patch });
@@ -52,6 +75,27 @@ function FilterContent({ filters, onChange }: { filters: FilterState; onChange: 
 
   return (
     <>
+      {/* 빠른 선택 칩 */}
+      <div className="flex flex-wrap gap-1.5 mb-5">
+        {QUICK_CHIPS.map((chip) => {
+          const active = chip.isActive(filters);
+          return (
+            <button
+              key={chip.id}
+              onClick={() => set(chip.patch(active))}
+              className={`inline-flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-full font-medium transition-all border
+                ${active
+                  ? "bg-brand-800 text-white border-brand-800"
+                  : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700"
+                }`}
+            >
+              <span className="leading-none">{chip.emoji}</span>
+              <span>{chip.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* 검색 */}
       <input
         type="search"

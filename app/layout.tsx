@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "./globals.css";
+import Footer from "@/components/Footer";
 import { buildWebSiteJsonLd, buildOrganizationJsonLd } from "@/lib/seo/jsonld";
 import { SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/seo/metadata";
 
@@ -114,6 +115,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           />
         </noscript>
         {children}
+        <Footer />
       </body>
     </html>
   );
