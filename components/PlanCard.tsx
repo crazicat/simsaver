@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { Plan } from "@/lib/types";
 import { fmtFee, fmtData, fmtVoice, fmtSms, fmtThrottle } from "@/lib/plans";
 
@@ -97,9 +98,15 @@ export default function PlanCard({
       <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-0.5">
         {plan.carrier}
       </p>
-      <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 leading-snug line-clamp-2">
-        {plan.name}
-      </h3>
+      <Link
+        href={`/plans/${plan.id}`}
+        onClick={(e) => e.stopPropagation()}
+        className="block"
+      >
+        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 leading-snug line-clamp-2 hover:text-brand-700 dark:hover:text-brand-300 transition-colors">
+          {plan.name}
+        </h3>
+      </Link>
 
       {/* 요금 */}
       <div className="mb-3">

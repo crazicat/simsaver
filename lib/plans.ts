@@ -71,6 +71,18 @@ function dbToPlan(row: DbPlan): Plan {
   };
 }
 
+// DB에서 단일 요금제 가져오기 (ID 기반 — 상세 페이지용)
+export async function fetchPlanById(id: string): Promise<Plan | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("plans")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error || !data) return null;
+  return dbToPlan(data as DbPlan);
+}
+
 // DB에서 활성 요금제 목록 가져오기
 export async function fetchPlansFromDb(): Promise<Plan[]> {
   if (!supabase) {
