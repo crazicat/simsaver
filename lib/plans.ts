@@ -47,6 +47,16 @@ function toMvno(carrier: string): "SKT" | "KT" | "LGU+" {
 
 // DB row → Plan 변환
 function dbToPlan(row: DbPlan): Plan {
+  // 데이터 정합성 보정:
+  // data_unlimited=true 이지만 통화가 300분 미만인 경우,
+  // 크롤러가 "데이터 미제공(dataQnt=0)"을 "무제한"으로 오수집한 케이스.
+  // 다음 크롤링 전까지 표시 레이어에서 보정.
+  const isDataMisclassified =
+    row.data_unlimited === true &&
+    row.voice_unlimited === false &&
+    row.voice_min !== null &&
+    row.voice_min < 300;
+
   return {
     id: row.id,
     carrier: row.carrier_name,
@@ -54,7 +64,9 @@ function dbToPlan(row: DbPlan): Plan {
     network: row.network,
     name: row.name,
     monthlyFee: row.monthly_fee,
-    data: row.data_unlimited
+    data: isDataMisclassified
+      ? { total: 0 }                          // 데이터 미제공으로 보정
+      : row.data_unlimited
       ? { total: "unlimited" }
       : { total: row.data_mb ?? 0, throttledSpeed: row.throttled_speed ?? undefined },
     voice: row.voice_unlimited ? "unlimited" : (row.voice_min ?? 0),
