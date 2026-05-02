@@ -306,10 +306,11 @@ export type PlanBadge = "가성비 BEST" | "무제한 최저가" | null;
  * 완전무제한 중 최저가 3개                         → "무제한 최저가"
  */
 export function getPlanBadge(plan: Plan, allPlans: Plan[]): PlanBadge {
-  // 완전무제한 최저가 3개
-  if (plan.data.total === "unlimited") {
+  // 완전무제한 최저가: 데이터 무제한 + 통화 무제한 모두 충족해야 함
+  // (통화 제한 요금제가 data_unlimited=true로 잘못 수집된 경우 제외)
+  if (plan.data.total === "unlimited" && plan.voice === "unlimited") {
     const sorted = allPlans
-      .filter((p) => p.data.total === "unlimited")
+      .filter((p) => p.data.total === "unlimited" && p.voice === "unlimited")
       .sort((a, b) => a.monthlyFee - b.monthlyFee);
     if (sorted.slice(0, 3).some((p) => p.id === plan.id)) return "무제한 최저가";
     return null;
