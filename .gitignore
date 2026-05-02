@@ -1,1 +1,10 @@
 .vercel
+.next/
+node_modules/
+.env*.local
+tsconfig.tsbuildinfo
+
+# next-pwa 자동 생성 파일
+public/sw.js
+public/workbox-*.js
+public/worker-*.js
