@@ -152,7 +152,7 @@ export default function HomeClient({
     setFavs((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
-      try { localStorage.setItem("simsaver_favs", JSON.stringify([...next])); } catch { /* ignore */ }
+      try { localStorage.setItem("simsaver_favs", JSON.stringify(Array.from(next))); } catch { /* ignore */ }
       return next;
     });
   }, []);
