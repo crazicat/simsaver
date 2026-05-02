@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Plan } from "@/lib/types";
 import { fmtFee, fmtData, fmtVoice, fmtSms, fmtThrottle } from "@/lib/plans";
 
@@ -14,7 +15,7 @@ interface Props {
   annualFee?: number;
 }
 
-/** 혜택 텍스트 키워드 → 이모지 아이콘 */
+/** 혜택 텍스트 키워드 → 이모지 */
 function benefitIcon(text: string): string {
   const t = text.toLowerCase();
   if (/넷플릭스|netflix/.test(t))                    return "🎬";
@@ -36,9 +37,9 @@ function benefitIcon(text: string): string {
 }
 
 const MVNO_BADGE: Record<string, string> = {
-  SKT: "badge badge-skt",
-  KT: "badge badge-kt",
-  "LGU+": "badge badge-lgu",
+  SKT:   "badge badge-skt",
+  KT:    "badge badge-kt",
+  "LGU+":"badge badge-lgu",
 };
 
 export default function PlanCard({
@@ -51,9 +52,8 @@ export default function PlanCard({
   showAnnual = false,
   annualFee,
 }: Props) {
-  const hasLink = !!plan.url;
+  const router = useRouter();
 
-  // 데이터 + 소진후 속도 통합 표시 ("7GB + 1Mbps" 형태)
   const dataDisplay = (() => {
     const base = fmtData(plan.data);
     if (plan.data.throttledSpeed && plan.data.total !== "unlimited") {
@@ -62,10 +62,13 @@ export default function PlanCard({
     return base;
   })();
 
+  // 카드 전체 클릭 → 내부 상세 페이지
+  const handleCardClick = () => router.push(`/plans/${plan.id}`);
+
   return (
     <article
-      className={`plan-card p-4 sm:p-5 relative ${inCompare ? "selected" : ""} ${hasLink ? "cursor-pointer hover:shadow-md transition-shadow" : ""}`}
-      onClick={hasLink ? () => window.open(plan.url, "_blank", "noopener,noreferrer") : undefined}
+      className={`plan-card p-4 sm:p-5 relative cursor-pointer ${inCompare ? "selected" : ""}`}
+      onClick={handleCardClick}
     >
       {/* 즐겨찾기 */}
       <button
@@ -98,15 +101,10 @@ export default function PlanCard({
       <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-0.5">
         {plan.carrier}
       </p>
-      <Link
-        href={`/plans/${plan.id}`}
-        onClick={(e) => e.stopPropagation()}
-        className="block"
-      >
-        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 leading-snug line-clamp-2 hover:text-brand-700 dark:hover:text-brand-300 transition-colors">
-          {plan.name}
-        </h3>
-      </Link>
+      <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 leading-snug line-clamp-2
+                     hover:text-brand-700 dark:hover:text-brand-300 transition-colors">
+        {plan.name}
+      </h3>
 
       {/* 요금 */}
       <div className="mb-3">
@@ -141,8 +139,7 @@ export default function PlanCard({
         )}
       </div>
 
-      {/* 스펙: 모바일은 인라인, 데스크탑은 박스 */}
-      {/* 모바일 인라인 */}
+      {/* 스펙: 모바일 인라인 */}
       <div className="sm:hidden text-[12px] text-gray-600 dark:text-gray-400 space-y-0.5 mb-3">
         <p>
           <span className="text-gray-400 mr-1">데이터</span>
@@ -157,7 +154,7 @@ export default function PlanCard({
         </p>
       </div>
 
-      {/* 데스크탑 박스 */}
+      {/* 스펙: 데스크탑 박스 */}
       <div className="hidden sm:flex gap-2 mb-3">
         <div className="spec-box">
           <p className="text-[10px] text-gray-400 mb-0.5">데이터</p>
@@ -190,11 +187,26 @@ export default function PlanCard({
         </div>
       )}
 
-      {/* 하단 */}
+      {/* 하단: 가입버튼 + 비교 */}
       <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
-        <span className="text-[11px] text-gray-400">
-          업데이트 {plan.lastUpdated}
-        </span>
+        {/* 가입하기 버튼 — 외부 링크 (stopPropagation으로 카드 클릭과 분리) */}
+        {plan.url ? (
+          <a
+            href={plan.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-[11px] font-semibold text-brand-700 dark:text-brand-300
+                       bg-brand-50 dark:bg-brand-950 hover:bg-brand-100 dark:hover:bg-brand-900
+                       px-2.5 py-1 rounded-lg transition-colors"
+          >
+            가입하기 →
+          </a>
+        ) : (
+          <span className="text-[11px] text-gray-400">업데이트 {plan.lastUpdated}</span>
+        )}
+
+        {/* 비교 체크박스 */}
         <label
           className={`flex items-center gap-1.5 cursor-pointer text-xs select-none
             ${inCompare ? "text-brand-600 font-medium" : "text-gray-400"}

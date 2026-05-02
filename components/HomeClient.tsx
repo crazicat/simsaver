@@ -278,6 +278,25 @@ export default function HomeClient({
           {/* ── 히어로 배너 ── */}
           {heroBanner && <BannerHero banner={heroBanner} />}
 
+          {/* ── 가치 제안 헤드라인 ── */}
+          <div className="mb-5">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-gray-50 leading-tight mb-1">
+              알뜰폰 요금제, 한눈에 비교
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2 flex-wrap">
+              <span>SKT · KT · LGU+ 망</span>
+              <span className="text-gray-300 dark:text-gray-600">·</span>
+              <span className="font-semibold text-brand-700 dark:text-brand-300">
+                {plans.length}개 요금제
+              </span>
+              <span className="text-gray-300 dark:text-gray-600">·</span>
+              <span className="flex items-center gap-1">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                매일 자동 업데이트
+              </span>
+            </p>
+          </div>
+
           {/* ── 망 탭 (모바일·데스크탑 공통) ── */}
           <div className="flex gap-1.5 mb-4">
             {MVNO_TABS.map((tab) => {
