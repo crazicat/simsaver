@@ -1,8 +1,7 @@
 "use client";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plan } from "@/lib/types";
-import { fmtFee, fmtData, fmtVoice, fmtSms, fmtThrottle } from "@/lib/plans";
+import { fmtFee, fmtData, fmtVoice, fmtSms, fmtThrottle, PlanBadge } from "@/lib/plans";
 
 interface Props {
   plan: Plan;
@@ -13,6 +12,7 @@ interface Props {
   compareDisabled: boolean;
   showAnnual?: boolean;
   annualFee?: number;
+  badge?: PlanBadge;
 }
 
 /** 혜택 텍스트 키워드 → 이모지 */
@@ -51,6 +51,7 @@ export default function PlanCard({
   compareDisabled,
   showAnnual = false,
   annualFee,
+  badge,
 }: Props) {
   const router = useRouter();
 
@@ -83,6 +84,19 @@ export default function PlanCard({
           <span className="text-gray-300 dark:text-gray-600">♡</span>
         )}
       </button>
+
+      {/* 가성비 뱃지 */}
+      {badge && (
+        <div className="mb-2">
+          <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full
+            ${badge === "가성비 BEST"
+              ? "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300"
+              : "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
+            }`}>
+            {badge === "가성비 BEST" ? "🏅" : "♾️"} {badge}
+          </span>
+        </div>
+      )}
 
       {/* 뱃지 줄 */}
       <div className="flex items-center gap-1.5 flex-wrap mb-2 pr-7">

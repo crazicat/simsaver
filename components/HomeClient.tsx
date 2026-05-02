@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Plan, SortKey } from "@/lib/types";
 import { Banner } from "@/lib/banners";
-import { filterAndSort, DEFAULT_FILTERS, calcAnnualFee } from "@/lib/plans";
+import { filterAndSort, DEFAULT_FILTERS, calcAnnualFee, getPlanBadge } from "@/lib/plans";
 import PlanCard from "@/components/PlanCard";
 import FilterPanel from "@/components/FilterPanel";
 import CompareModal from "@/components/CompareModal";
@@ -231,6 +231,18 @@ export default function HomeClient({
           {/* 구분선 */}
           <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
 
+          {/* 필터 초기화 (활성 시만 노출) */}
+          {activeFilterCount > 0 && (
+            <button
+              onClick={() => setFilters(DEFAULT_FILTERS)}
+              className="flex-shrink-0 flex items-center gap-1 text-xs text-rose-600 dark:text-rose-400
+                         bg-rose-50 dark:bg-rose-950/50 px-2 py-1.5 rounded-lg font-medium"
+              aria-label="필터 초기화"
+            >
+              ✕
+            </button>
+          )}
+
           {/* 필터 버튼 */}
           <button
             onClick={() => setShowMobileFilter(true)}
@@ -377,12 +389,24 @@ export default function HomeClient({
 
           {/* 결과 수 + 정렬 (데스크탑) */}
           <div className="flex items-center justify-between mb-4">
-            <p className="text-sm text-gray-500">
-              <span className="text-lg font-bold text-gray-900 dark:text-white">
-                {filtered.length}
-              </span>
-              <span className="ml-0.5">개 요금제</span>
-            </p>
+            <div className="flex items-center gap-3">
+              <p className="text-sm text-gray-500">
+                <span className="text-lg font-bold text-gray-900 dark:text-white">
+                  {filtered.length}
+                </span>
+                <span className="ml-0.5">개 요금제</span>
+              </p>
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={() => setFilters(DEFAULT_FILTERS)}
+                  className="hidden sm:flex items-center gap-1 text-xs text-rose-600 dark:text-rose-400
+                             hover:text-rose-700 dark:hover:text-rose-300 font-medium transition-colors"
+                >
+                  <span className="text-[10px]">✕</span>
+                  <span>필터 {activeFilterCount}개 초기화</span>
+                </button>
+              )}
+            </div>
             <div className="hidden sm:flex items-center gap-2">
               <button
                 onClick={() => setShowAnnual(v => !v)}
@@ -429,6 +453,7 @@ export default function HomeClient({
                     onCompare={() => toggleCompare(plan.id)}
                     showAnnual={showAnnual}
                     annualFee={calcAnnualFee(plan)}
+                    badge={getPlanBadge(plan, plans)}
                   />
                 </React.Fragment>
               ))}

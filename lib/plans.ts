@@ -298,6 +298,35 @@ export function filterAndSort(
   });
 }
 
+// ── 가성비 뱃지 ────────────────────────────────────────────
+export type PlanBadge = "가성비 BEST" | "무제한 최저가" | null;
+
+/**
+ * 전체 요금제 중 상위 15% 가성비(데이터MB/월정액) → "가성비 BEST"
+ * 완전무제한 중 최저가 3개                         → "무제한 최저가"
+ */
+export function getPlanBadge(plan: Plan, allPlans: Plan[]): PlanBadge {
+  // 완전무제한 최저가 3개
+  if (plan.data.total === "unlimited") {
+    const sorted = allPlans
+      .filter((p) => p.data.total === "unlimited")
+      .sort((a, b) => a.monthlyFee - b.monthlyFee);
+    if (sorted.slice(0, 3).some((p) => p.id === plan.id)) return "무제한 최저가";
+    return null;
+  }
+  // 데이터 있는 요금제: MB/원 가성비 점수 상위 15%
+  const dataPlans = allPlans.filter(
+    (p) => p.data.total !== "unlimited" && (p.data.total as number) > 0
+  );
+  if (dataPlans.length === 0) return null;
+  const score = (plan.data.total as number) / plan.monthlyFee;
+  const allScores = dataPlans
+    .map((p) => (p.data.total as number) / p.monthlyFee)
+    .sort((a, b) => b - a);
+  const threshold = allScores[Math.ceil(allScores.length * 0.15) - 1] ?? 0;
+  return score >= threshold ? "가성비 BEST" : null;
+}
+
 export const DEFAULT_FILTERS: FilterState = {
   search: "",
   mvno: [],
