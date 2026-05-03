@@ -110,11 +110,13 @@ export default function HomeClient({
   const [showModal, setShowModal] = useState(false);
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [showAnnual, setShowAnnual] = useState(false);
+  const [showFavsOnly, setShowFavsOnly] = useState(false);
 
-  const filtered = useMemo(
-    () => filterAndSort(plans, filters, sort),
-    [plans, filters, sort]
-  );
+  const filtered = useMemo(() => {
+    const result = filterAndSort(plans, filters, sort);
+    if (showFavsOnly) return result.filter(p => favs.has(p.id));
+    return result;
+  }, [plans, filters, sort, showFavsOnly, favs]);
 
   // ── 배너 슬롯 ───────────────────────────────────────────────
   const heroBanner    = banners.find((b) => b.position === "hero");
@@ -231,10 +233,32 @@ export default function HomeClient({
           {/* 구분선 */}
           <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
 
+          {/* 즐겨찾기만 보기 */}
+          <button
+            onClick={() => setShowFavsOnly(v => !v)}
+            aria-label="즐겨찾기만 보기"
+            className={`flex-shrink-0 text-base leading-none transition-all active:scale-95
+              ${showFavsOnly ? "text-red-500" : favs.size > 0 ? "text-gray-400" : "text-gray-200 dark:text-gray-700"}`}
+          >
+            {showFavsOnly ? "♥" : "♡"}
+          </button>
+
+          {/* 12개월 납부총액 */}
+          <button
+            onClick={() => setShowAnnual(v => !v)}
+            aria-label="12개월 납부총액 표시"
+            className={`flex-shrink-0 text-xs px-2 py-1.5 rounded-lg font-medium transition-all
+              ${showAnnual
+                ? "bg-brand-800 text-white"
+                : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"}`}
+          >
+            📅
+          </button>
+
           {/* 필터 초기화 (활성 시만 노출) */}
-          {activeFilterCount > 0 && (
+          {(activeFilterCount > 0 || showFavsOnly) && (
             <button
-              onClick={() => setFilters(DEFAULT_FILTERS)}
+              onClick={() => { setFilters(DEFAULT_FILTERS); setShowFavsOnly(false); }}
               className="flex-shrink-0 flex items-center gap-1 text-xs text-rose-600 dark:text-rose-400
                          bg-rose-50 dark:bg-rose-950/50 px-2 py-1.5 rounded-lg font-medium"
               aria-label="필터 초기화"
@@ -367,7 +391,7 @@ export default function HomeClient({
           )}
 
           {/* 테마 퀵필터 칩 (데스크탑) */}
-          <div className="hidden sm:flex gap-2 mb-4 flex-wrap">
+          <div className="hidden sm:flex gap-2 mb-4 flex-wrap items-center">
             {THEME_CHIPS.map((chip) => {
               const active = chip.isActive(filters);
               return (
@@ -385,6 +409,18 @@ export default function HomeClient({
                 </button>
               );
             })}
+            {/* 즐겨찾기 필터 */}
+            <button
+              onClick={() => setShowFavsOnly(v => !v)}
+              className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium transition-all border
+                ${showFavsOnly
+                  ? "bg-red-500 text-white border-red-500 shadow-sm"
+                  : "bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-red-300 hover:text-red-500"
+                }`}
+            >
+              <span className="leading-none">{showFavsOnly ? "♥" : "♡"}</span>
+              <span>즐겨찾기{favs.size > 0 ? ` ${favs.size}` : ""}</span>
+            </button>
           </div>
 
           {/* 결과 수 + 정렬 (데스크탑) */}
@@ -460,14 +496,29 @@ export default function HomeClient({
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-              <p className="text-4xl mb-3">🔍</p>
-              <p className="text-sm">조건에 맞는 요금제가 없습니다</p>
-              <button
-                onClick={() => setFilters(DEFAULT_FILTERS)}
-                className="mt-3 text-xs text-brand-600 hover:underline font-medium"
-              >
-                필터 초기화
-              </button>
+              {showFavsOnly ? (
+                <>
+                  <p className="text-4xl mb-3">♡</p>
+                  <p className="text-sm">즐겨찾기한 요금제가 없습니다</p>
+                  <button
+                    onClick={() => setShowFavsOnly(false)}
+                    className="mt-3 text-xs text-brand-600 hover:underline font-medium"
+                  >
+                    전체 요금제 보기
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-4xl mb-3">🔍</p>
+                  <p className="text-sm">조건에 맞는 요금제가 없습니다</p>
+                  <button
+                    onClick={() => setFilters(DEFAULT_FILTERS)}
+                    className="mt-3 text-xs text-brand-600 hover:underline font-medium"
+                  >
+                    필터 초기화
+                  </button>
+                </>
+              )}
             </div>
           )}
         </main>
