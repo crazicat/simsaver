@@ -48,6 +48,7 @@ export default function CompareModal({ plans, onClose }: Props) {
         className="bg-white dark:bg-gray-900 w-full sm:max-w-3xl
                    rounded-t-3xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto
                    border border-gray-100 dark:border-gray-800"
+        style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* 헤더 */}
@@ -55,7 +56,9 @@ export default function CompareModal({ plans, onClose }: Props) {
           <h2 className="text-base font-semibold">요금제 비교</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-xl leading-none p-1"
+            className="w-8 h-8 flex items-center justify-center rounded-full
+                       text-gray-400 hover:text-gray-600 hover:bg-gray-100
+                       dark:hover:bg-gray-800 transition-colors"
             aria-label="닫기"
           >
             ✕
@@ -101,17 +104,33 @@ export default function CompareModal({ plans, onClose }: Props) {
               ))}
 
               {/* 혜택 */}
-              <div className="mt-3 flex flex-wrap gap-1">
-                {p.benefits.map((b) => (
-                  <span
-                    key={b}
-                    className="text-[10px] bg-blue-50 dark:bg-blue-950
-                               text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full"
-                  >
-                    {b}
-                  </span>
-                ))}
-              </div>
+              {p.benefits.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1">
+                  {p.benefits.map((b) => (
+                    <span
+                      key={b}
+                      className="text-[10px] bg-blue-50 dark:bg-blue-950
+                                 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full"
+                    >
+                      {b}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* 가입하기 CTA */}
+              {p.url && (
+                <a
+                  href={p.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 w-full inline-flex items-center justify-center
+                             text-xs font-semibold py-2 rounded-lg
+                             bg-brand-800 hover:bg-brand-700 text-white transition-colors"
+                >
+                  가입하기 →
+                </a>
+              )}
             </div>
           ))}
         </div>

@@ -97,15 +97,28 @@ function FilterContent({ filters, onChange }: { filters: FilterState; onChange: 
       </div>
 
       {/* 검색 */}
-      <input
-        type="search"
-        placeholder="통신사 / 요금제 검색"
-        value={filters.search}
-        onChange={(e) => set({ search: e.target.value })}
-        className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-700
-                   bg-gray-50 dark:bg-gray-800 placeholder-gray-400 outline-none
-                   focus:border-brand-400 transition-colors mb-5"
-      />
+      <div className="relative mb-5">
+        <input
+          type="search"
+          placeholder="통신사 / 요금제 검색"
+          value={filters.search}
+          onChange={(e) => set({ search: e.target.value })}
+          className="w-full px-3 py-2.5 pr-8 text-sm rounded-xl border border-gray-200 dark:border-gray-700
+                     bg-gray-50 dark:bg-gray-800 placeholder-gray-400 outline-none
+                     focus:border-brand-400 transition-colors"
+        />
+        {filters.search && (
+          <button
+            onClick={() => set({ search: "" })}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2
+                       text-gray-400 hover:text-gray-600 dark:hover:text-gray-200
+                       text-xs leading-none p-0.5"
+            aria-label="검색어 지우기"
+          >
+            ✕
+          </button>
+        )}
+      </div>
 
       {/* 기반망 */}
       <div className="mb-5">
@@ -281,7 +294,7 @@ export default function FilterPanel({ filters, onChange, isMobile, onClose }: Pr
               onClick={onClose}
               className="w-full btn-primary justify-center"
             >
-              적용하기
+              닫기
             </button>
           </div>
         </div>

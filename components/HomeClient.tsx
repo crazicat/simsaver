@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Plan, SortKey } from "@/lib/types";
 import { Banner } from "@/lib/banners";
-import { filterAndSort, DEFAULT_FILTERS, calcAnnualFee, getPlanBadge } from "@/lib/plans";
+import { filterAndSort, DEFAULT_FILTERS, calcAnnualFee, computeAllBadges } from "@/lib/plans";
 import PlanCard from "@/components/PlanCard";
 import FilterPanel from "@/components/FilterPanel";
 import CompareModal from "@/components/CompareModal";
@@ -123,11 +123,18 @@ export default function HomeClient({
   const midBanners    = banners.filter((b) => b.position === "mid_grid");
   const sidebarBanner = banners.find((b) => b.position === "sidebar");
 
-  const comparePlans = plans.filter((p) => compare.includes(p.id));
+  // useMemo로 O(n log n) 뱃지 계산 — plans 변경 시만 재계산
+  const badgeMap = useMemo(() => computeAllBadges(plans), [plans]);
 
-  const lastUpdated = plans.length > 0
-    ? plans.map((p) => p.lastUpdated).sort().reverse()[0]
-    : null;
+  const comparePlans = useMemo(
+    () => plans.filter((p) => compare.includes(p.id)),
+    [plans, compare]
+  );
+
+  const lastUpdated = useMemo(
+    () => plans.length > 0 ? plans.map((p) => p.lastUpdated).sort().reverse()[0] : null,
+    [plans]
+  );
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -489,7 +496,7 @@ export default function HomeClient({
                     onCompare={() => toggleCompare(plan.id)}
                     showAnnual={showAnnual}
                     annualFee={calcAnnualFee(plan)}
-                    badge={getPlanBadge(plan, plans)}
+                    badge={badgeMap.get(plan.id) ?? null}
                   />
                 </React.Fragment>
               ))}
@@ -547,8 +554,9 @@ export default function HomeClient({
           </button>
           <button
             onClick={() => setCompare([])}
-            className="absolute -top-2 -right-2 w-5 h-5 rounded-full
-                       bg-gray-500 text-white text-xs flex items-center justify-center"
+            className="absolute -top-3 -right-3 w-7 h-7 rounded-full
+                       bg-gray-600 hover:bg-gray-700 text-white text-xs
+                       flex items-center justify-center transition-colors shadow-md"
             aria-label="비교 목록 초기화"
           >
             ✕

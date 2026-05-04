@@ -220,6 +220,7 @@ export function fmtFee(n: number) {
 
 export function fmtData(d: Plan["data"]) {
   if (d.total === "unlimited") return "완전무제한";
+  if (d.total === 0) return "-";
   const gb = d.total / 1024;
   if (gb < 1) return `${d.total}MB`;
   return `${gb % 1 === 0 ? gb.toFixed(0) : gb.toFixed(1)}GB`;
@@ -314,12 +315,48 @@ export function filterAndSort(
 export type PlanBadge = "가성비 BEST" | "무제한 최저가" | null;
 
 /**
- * 전체 요금제 중 상위 15% 가성비(데이터MB/월정액) → "가성비 BEST"
- * 완전무제한 중 최저가 3개                         → "무제한 최저가"
+ * 전체 요금제 뱃지를 한 번에 계산 — O(n log n)
+ * 카드 렌더링 시 per-card O(n) getPlanBadge 대신 이 Map을 useMemo로 전달.
+ */
+export function computeAllBadges(allPlans: Plan[]): Map<string, PlanBadge> {
+  const result = new Map<string, PlanBadge>();
+
+  // 완전무제한 최저가 top-3 ID 세트
+  const unlimitedTop3 = new Set(
+    allPlans
+      .filter((p) => p.data.total === "unlimited" && p.voice === "unlimited")
+      .sort((a, b) => a.monthlyFee - b.monthlyFee)
+      .slice(0, 3)
+      .map((p) => p.id)
+  );
+
+  // 데이터 있는 요금제 가성비 threshold (상위 15%)
+  const dataPlans = allPlans.filter(
+    (p) => p.data.total !== "unlimited" && (p.data.total as number) > 0
+  );
+  const allScores = dataPlans
+    .map((p) => (p.data.total as number) / p.monthlyFee)
+    .sort((a, b) => b - a);
+  const threshold = allScores[Math.ceil(allScores.length * 0.15) - 1] ?? 0;
+
+  for (const plan of allPlans) {
+    if (plan.data.total === "unlimited" && plan.voice === "unlimited") {
+      result.set(plan.id, unlimitedTop3.has(plan.id) ? "무제한 최저가" : null);
+    } else if (plan.data.total !== "unlimited" && (plan.data.total as number) > 0) {
+      const score = (plan.data.total as number) / plan.monthlyFee;
+      result.set(plan.id, score >= threshold ? "가성비 BEST" : null);
+    } else {
+      result.set(plan.id, null);
+    }
+  }
+  return result;
+}
+
+/**
+ * @deprecated computeAllBadges() 사용 권장 (O(n log n) vs O(n²))
+ * 단일 플랜 상세 페이지 등 allPlans를 이미 갖고 있는 경우에만 사용.
  */
 export function getPlanBadge(plan: Plan, allPlans: Plan[]): PlanBadge {
-  // 완전무제한 최저가: 데이터 무제한 + 통화 무제한 모두 충족해야 함
-  // (통화 제한 요금제가 data_unlimited=true로 잘못 수집된 경우 제외)
   if (plan.data.total === "unlimited" && plan.voice === "unlimited") {
     const sorted = allPlans
       .filter((p) => p.data.total === "unlimited" && p.voice === "unlimited")
@@ -327,7 +364,6 @@ export function getPlanBadge(plan: Plan, allPlans: Plan[]): PlanBadge {
     if (sorted.slice(0, 3).some((p) => p.id === plan.id)) return "무제한 최저가";
     return null;
   }
-  // 데이터 있는 요금제: MB/원 가성비 점수 상위 15%
   const dataPlans = allPlans.filter(
     (p) => p.data.total !== "unlimited" && (p.data.total as number) > 0
   );

@@ -4,17 +4,8 @@ import { Banner } from "@/lib/banners";
 interface Props { banner: Banner }
 
 export default function BannerHero({ banner }: Props) {
-  const handleClick = () => {
-    if (banner.linkUrl) window.open(banner.linkUrl, "_blank", "noopener,noreferrer");
-  };
-
-  return (
-    <div
-      className={`relative rounded-2xl overflow-hidden mb-4 ${banner.linkUrl ? "cursor-pointer" : ""}`}
-      style={{ background: banner.bgColor, color: banner.textColor }}
-      onClick={banner.linkUrl ? handleClick : undefined}
-      role={banner.linkUrl ? "link" : undefined}
-    >
+  const inner = (
+    <>
       {/* 배경 장식 */}
       <div className="absolute inset-0 opacity-10 pointer-events-none"
            style={{ background: "radial-gradient(circle at 80% 50%, white 0%, transparent 60%)" }} />
@@ -41,12 +32,37 @@ export default function BannerHero({ banner }: Props) {
         </div>
         {banner.ctaText && banner.linkUrl && (
           <span className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg whitespace-nowrap
-                           bg-white/20 hover:bg-white/30 transition-colors"
+                           bg-white/20 group-hover:bg-white/30 transition-colors"
                 style={{ color: banner.textColor }}>
             {banner.ctaText} →
           </span>
         )}
       </div>
+    </>
+  );
+
+  if (banner.linkUrl) {
+    return (
+      <a
+        href={banner.linkUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group relative rounded-2xl overflow-hidden mb-4 block
+                   focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+        style={{ background: banner.bgColor, color: banner.textColor }}
+        aria-label={banner.title}
+      >
+        {inner}
+      </a>
+    );
+  }
+
+  return (
+    <div
+      className="relative rounded-2xl overflow-hidden mb-4"
+      style={{ background: banner.bgColor, color: banner.textColor }}
+    >
+      {inner}
     </div>
   );
 }

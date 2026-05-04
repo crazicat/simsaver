@@ -114,7 +114,7 @@ export function buildItemListJsonLd(plans: Plan[]) {
     name: "알뜰폰 요금제 목록",
     description: "국내 알뜰폰(MVNO) 요금제 전체 비교 — SKT·KT·LGU+ 망",
     url: SITE_URL,
-    numberOfItems: plans.length,
+    numberOfItems: Math.min(plans.length, 50),
     itemListElement: plans.slice(0, 50).map((plan, index) => ({
       "@type": "ListItem",
       position: index + 1,

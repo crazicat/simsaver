@@ -56,8 +56,7 @@ export const viewport: Viewport = {
   themeColor: "#0f1724",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // maximumScale·userScalable 제거 — WCAG 1.4.4 준수 (사용자 확대 보장)
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

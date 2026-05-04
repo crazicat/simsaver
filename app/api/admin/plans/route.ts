@@ -9,15 +9,25 @@ function getAdminClient() {
   return createClient(url, key, { auth: { persistSession: false } });
 }
 
-function isAuthorized(req: NextRequest): boolean {
+function isAuthorized(req: NextRequest): boolean | "unconfigured" {
   const secret = process.env.ADMIN_SECRET;
-  if (!secret) return true;
+  if (!secret) return "unconfigured";
   return req.headers.get("authorization") === `Bearer ${secret}`;
+}
+
+function checkAuth(req: NextRequest): NextResponse | null {
+  const result = isAuthorized(req);
+  if (result === "unconfigured")
+    return NextResponse.json({ error: "ADMIN_SECRET not configured" }, { status: 500 });
+  if (!result)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  return null;
 }
 
 // ── GET: 요금제 목록 (검색 + 페이지네이션) ─────────────────────
 export async function GET(req: NextRequest) {
-  if (!isAuthorized(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authErr = checkAuth(req);
+  if (authErr) return authErr;
 
   const sp = req.nextUrl.searchParams;
   const page   = Math.max(1, parseInt(sp.get("page")  ?? "1"));
@@ -58,7 +68,8 @@ export async function GET(req: NextRequest) {
 
 // ── PUT: 요금제 수정 (?id=UUID) ───────────────────────────────
 export async function PUT(req: NextRequest) {
-  if (!isAuthorized(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authErr = checkAuth(req);
+  if (authErr) return authErr;
 
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id 필요" }, { status: 400 });
@@ -82,7 +93,8 @@ export async function PUT(req: NextRequest) {
 
 // ── POST: 요금제 수동 등록 ────────────────────────────────────
 export async function POST(req: NextRequest) {
-  if (!isAuthorized(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authErr = checkAuth(req);
+  if (authErr) return authErr;
 
   try {
     const body = await req.json();
