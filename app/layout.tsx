@@ -7,7 +7,7 @@ import { SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/seo/met
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: {
+  title: {h
     default: SITE_TITLE,
     template: `%s | ${SITE_NAME}`,
   },
@@ -49,6 +49,7 @@ export const metadata: Metadata = {
   },
   verification: {
     google: "5lUMUg3YZBUo9X9y4gqfdo4lMe1RzEb6obKT6t5SvrM",
+    other: { "naver-site-verification": "17b9ab4cfbf561fee946e2542ba68128672b14d4" },
   },
 };
 
