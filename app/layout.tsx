@@ -7,7 +7,7 @@ import { SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/seo/met
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: {h
+  title: {
     default: SITE_TITLE,
     template: `%s | ${SITE_NAME}`,
   },
