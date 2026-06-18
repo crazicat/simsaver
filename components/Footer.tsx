@@ -49,10 +49,10 @@ export default function Footer() {
               </a>
             </div>
             <div className="flex flex-col gap-2">
-              <p className="font-semibold text-gray-500 dark:text-gray-400 mb-0.5">망 종류</p>
-              <span className="text-red-400">SKT망</span>
-              <span className="text-amber-400">KT망</span>
-              <span className="text-purple-400">LGU+망</span>
+              <p className="font-semibold text-gray-500 dark:text-gray-400 mb-0.5">망별 비교</p>
+              <a href="/carriers/skt" className="text-red-400 hover:text-red-600 transition-colors">SKT망 요금제</a>
+              <a href="/carriers/kt" className="text-amber-400 hover:text-amber-600 transition-colors">KT망 요금제</a>
+              <a href="/carriers/lgu" className="text-purple-400 hover:text-purple-600 transition-colors">LGU+망 요금제</a>
             </div>
           </div>
         </div>
