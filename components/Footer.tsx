@@ -26,6 +26,12 @@ export default function Footer() {
                 요금제 비교
               </a>
               <a
+                href="/faq"
+                className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+              >
+                자주 묻는 질문
+              </a>
+              <a
                 href="/sitemap.xml"
                 target="_blank"
                 rel="noopener noreferrer"

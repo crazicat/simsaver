@@ -12,6 +12,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "hourly",
       priority: 1,
     },
+    {
+      url: `${SITE_URL}/faq`,
+      lastModified: new Date("2026-06-18"),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
   ];
 
   if (!supabase) return entries;
