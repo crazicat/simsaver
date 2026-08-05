@@ -67,15 +67,23 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cfg = MVNO_CONFIG[params.mvno];
   if (!cfg) return { title: "요금제를 찾을 수 없습니다" };
-  const title = `${cfg.label} 알뜰폰 요금제 비교 | ${SITE_NAME}`;
+  // layout.tsx 의 title.template("%s | 알뜰폰갤러리")이 접미사를 붙이므로 여기서는 생략
+  const title = `${cfg.label} 알뜰폰 요금제 비교`;
   const description = cfg.desc;
   const canonical = `${SITE_URL}/carriers/${params.mvno}`;
   return {
     title,
     description,
     alternates: { canonical },
-    openGraph: { type: "website", title, description, url: canonical, siteName: SITE_NAME, locale: "ko_KR" },
-    twitter: { card: "summary_large_image", title, description },
+    openGraph: {
+      type: "website",
+      title: `${title} | ${SITE_NAME}`,
+      description,
+      url: canonical,
+      siteName: SITE_NAME,
+      locale: "ko_KR",
+    },
+    twitter: { card: "summary_large_image", title: `${title} | ${SITE_NAME}`, description },
   };
 }
 

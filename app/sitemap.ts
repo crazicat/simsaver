@@ -40,13 +40,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   if (!supabase) return entries;
 
-  const { data } = await supabase
-    .from("plans")
-    .select("id, last_crawled_at")
-    .eq("is_active", true)
-    .order("last_crawled_at", { ascending: false });
+  // PostgREST max_rows=1000 하드캡 우회: range() 로 페이지네이션.
+  // (미적용 시 2,000개 이상의 요금제 중 1,000개만 사이트맵에 실림)
+  const PAGE = 1000;
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
+      .from("plans")
+      .select("id, last_crawled_at")
+      .eq("is_active", true)
+      .order("last_crawled_at", { ascending: false })
+      .range(from, from + PAGE - 1);
 
-  if (data) {
+    if (error) {
+      console.error("sitemap fetch error:", error.message);
+      break;
+    }
+    if (!data || data.length === 0) break;
+
     for (const plan of data) {
       entries.push({
         url: `${SITE_URL}/plans/${plan.id}`,
@@ -55,6 +65,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
       });
     }
+
+    if (data.length < PAGE) break; // 마지막 페이지
   }
 
   return entries;

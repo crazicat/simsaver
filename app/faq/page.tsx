@@ -3,13 +3,14 @@ import Link from "next/link";
 import { SITE_URL, SITE_NAME } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = {
-  title: `알뜰폰 요금제 자주 묻는 질문 (FAQ) | ${SITE_NAME}`,
+  // layout.tsx 의 title.template("%s | 알뜰폰갤러리")이 접미사를 붙이므로 여기서는 생략
+  title: "알뜰폰 요금제 자주 묻는 질문 (FAQ)",
   description:
     "알뜰폰 요금제 비교·가입·번호이동 등 자주 묻는 질문과 답변. KT·SKT·LGU+망 차이, 데이터 무제한, 유심비, 약정 여부까지 한 번에 확인하세요.",
   alternates: { canonical: `${SITE_URL}/faq` },
   openGraph: {
     type: "website",
-    title: `알뜰폰 FAQ | ${SITE_NAME}`,
+    title: `알뜰폰 요금제 자주 묻는 질문 (FAQ) | ${SITE_NAME}`,
     description: "알뜰폰 요금제 비교·가입·번호이동에 관한 모든 궁금증 해결",
     url: `${SITE_URL}/faq`,
     siteName: SITE_NAME,

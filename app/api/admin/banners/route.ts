@@ -10,20 +10,28 @@ function getAdminClient() {
 }
 
 // ── 인증 체크 ────────────────────────────────────────────────
-function isAuthorized(req: NextRequest): boolean {
+// ADMIN_SECRET 미설정 시 fail-closed. 예전에는 true(전면 허용)를 반환해
+// 인증 없이 배너 생성·수정·삭제가 가능했다(홈 배너에 임의 link_url 주입 가능).
+function isAuthorized(req: NextRequest): boolean | "unconfigured" {
   const secret = process.env.ADMIN_SECRET;
-  if (!secret) return true; // ADMIN_SECRET 미설정 시 전면 허용
+  if (!secret) return "unconfigured";
   const authHeader = req.headers.get("authorization") ?? "";
   return authHeader === `Bearer ${secret}`;
 }
 
-function unauthorized() {
-  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+/** 인증 실패 시 응답 반환, 통과 시 null */
+function checkAuth(req: NextRequest): NextResponse | null {
+  const result = isAuthorized(req);
+  if (result === "unconfigured")
+    return NextResponse.json({ error: "ADMIN_SECRET not configured" }, { status: 500 });
+  if (!result) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  return null;
 }
 
 // ── GET: 전체 배너 목록 (관리자용 — 비활성 포함) ──────────────
 export async function GET(req: NextRequest) {
-  if (!isAuthorized(req)) return unauthorized();
+  const authErr = checkAuth(req);
+  if (authErr) return authErr;
   try {
     const db = getAdminClient();
     const { data, error } = await db
@@ -40,7 +48,8 @@ export async function GET(req: NextRequest) {
 
 // ── POST: 배너 생성 ───────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  if (!isAuthorized(req)) return unauthorized();
+  const authErr = checkAuth(req);
+  if (authErr) return authErr;
   try {
     const body = await req.json();
     const db = getAdminClient();
@@ -58,7 +67,8 @@ export async function POST(req: NextRequest) {
 
 // ── PUT: 배너 수정 (?id=UUID) ──────────────────────────────────
 export async function PUT(req: NextRequest) {
-  if (!isAuthorized(req)) return unauthorized();
+  const authErr = checkAuth(req);
+  if (authErr) return authErr;
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id 필요" }, { status: 400 });
   try {
@@ -79,7 +89,8 @@ export async function PUT(req: NextRequest) {
 
 // ── DELETE: 배너 삭제 (?id=UUID) ──────────────────────────────
 export async function DELETE(req: NextRequest) {
-  if (!isAuthorized(req)) return unauthorized();
+  const authErr = checkAuth(req);
+  if (authErr) return authErr;
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id 필요" }, { status: 400 });
   try {
