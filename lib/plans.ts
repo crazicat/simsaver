@@ -2,15 +2,50 @@ import { Plan, FilterState, SortKey } from "./types";
 import { supabase } from "./supabase";
 
 // ── UTM 파라미터 삽입 ─────────────────────────────────────────
-function addUtm(rawUrl: string): string {
+export function addUtm(rawUrl: string, campaign?: string): string {
   try {
     const u = new URL(rawUrl);
     u.searchParams.set("utm_source", "MVNOGALLERY");
+    if (campaign) {
+      u.searchParams.set("utm_medium", "referral");
+      u.searchParams.set("utm_campaign", campaign);
+    }
     return u.toString();
   } catch {
     // 파싱 불가능한 URL(상대경로 등)은 원본 유지
     return rawUrl;
   }
+}
+
+// ── 데이터 품질 가드 ──────────────────────────────────────
+/** 이 기간 이상 크롤러가 갱신하지 않은 요금제는 노출하지 않음 (단종·구표기 좀비 레코드) */
+export const STALE_DAYS = 30;
+
+/** 크롤러가 HTML 엔티티를 그대로 저장한 경우 복원 (예: "모빙&#40;mobing&#41;") */
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
+    .replace(/&nbsp;/g, " ")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .trim();
+}
+
+/** 요금제가 아닌 페이지 문구가 수집된 경우 (예: "포인트란? >") */
+function isGarbageName(name: string): boolean {
+  return !name.trim() || /[?>]\s*$/.test(name.trim());
+}
+
+function staleCutoffIso(): string {
+  return new Date(Date.now() - STALE_DAYS * 86_400_000).toISOString();
+}
+
+/** 가입 버튼용 경유 URL — /go 에서 클릭을 기록한 뒤 통신사 가입 페이지로 리다이렉트 */
+export function goUrl(plan: Pick<Plan, "id">, src: "card" | "detail" | "compare" | "carrier"): string {
+  return `/go/${plan.id}?src=${src}`;
 }
 
 // ── Supabase DB row 타입 ──────────────────────────────────
@@ -36,6 +71,7 @@ interface DbPlan {
   original_fee?: number | null;
   promo_months?: number | null;
   promo_text?: string | null;
+  crawler_protected?: boolean;
 }
 
 // carrier_name → mvno 매핑
@@ -59,10 +95,10 @@ function dbToPlan(row: DbPlan): Plan {
 
   return {
     id: row.id,
-    carrier: row.carrier_name,
+    carrier: decodeEntities(row.carrier_name),
     mvno: row.mvno ?? toMvno(row.carrier_name),
     network: row.network,
-    name: row.name,
+    name: decodeEntities(row.name),
     monthlyFee: row.monthly_fee,
     data: isDataMisclassified
       ? { total: 0 }                          // 데이터 미제공으로 보정
@@ -84,6 +120,11 @@ function dbToPlan(row: DbPlan): Plan {
 }
 
 // DB에서 단일 요금제 가져오기 (ID 기반 — 상세 페이지용)
+/** 상세 페이지 noindex 판단용 */
+export function isStalePlan(plan: Pick<Plan, "lastUpdated">): boolean {
+  return plan.lastUpdated < staleCutoffIso().slice(0, 10);
+}
+
 export async function fetchPlanById(id: string): Promise<Plan | null> {
   if (!supabase) return null;
   const { data, error } = await supabase
@@ -127,7 +168,13 @@ export async function fetchPlansFromDb(): Promise<Plan[]> {
   }
 
   if (allRows.length === 0) return MOCK_PLANS;
-  return allRows.map(dbToPlan);
+
+  // 품질 가드: 오래 갱신되지 않은 레코드(어드민 보호 건 제외)와 요금제가 아닌 항목 제외
+  const cutoff = staleCutoffIso();
+  return allRows
+    .filter((r) => r.crawler_protected || !r.last_crawled_at || r.last_crawled_at >= cutoff)
+    .filter((r) => !isGarbageName(decodeEntities(r.name)))
+    .map(dbToPlan);
 }
 
 export const MOCK_PLANS: Plan[] = [

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { Plan } from "@/lib/types";
-import { fmtFee, fmtData, fmtVoice, fmtSms, fmtThrottle, fmtContract } from "@/lib/plans";
+import { fmtFee, fmtData, fmtVoice, fmtSms, fmtThrottle, fmtContract, goUrl } from "@/lib/plans";
 
 interface Props {
   plans: Plan[];
@@ -121,9 +121,9 @@ export default function CompareModal({ plans, onClose }: Props) {
               {/* 가입하기 CTA */}
               {p.url && (
                 <a
-                  href={p.url}
+                  href={goUrl(p, "compare")}
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="nofollow noopener"
                   className="mt-4 w-full inline-flex items-center justify-center
                              text-xs font-semibold py-2 rounded-lg
                              bg-brand-800 hover:bg-brand-700 text-white transition-colors"

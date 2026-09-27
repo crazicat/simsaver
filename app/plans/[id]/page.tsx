@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { fetchPlanById, fetchPlansFromDb, fmtData, fmtVoice, fmtSms, fmtFee, fmtThrottle, fmtContract } from "@/lib/plans";
+import { fetchPlanById, fetchPlansFromDb, fmtData, fmtVoice, fmtSms, fmtFee, fmtThrottle, fmtContract, goUrl } from "@/lib/plans";
 import { buildPlanMetadata } from "@/lib/seo/metadata";
 import { buildProductJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { SITE_URL } from "@/lib/seo/metadata";
@@ -198,9 +198,9 @@ export default async function PlanDetailPage({ params }: Props) {
           <div className="space-y-3">
             {plan.url ? (
               <a
-                href={plan.url}
+                href={goUrl(plan, "detail")}
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="nofollow noopener"
                 className="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl text-base transition-colors shadow-sm"
               >
                 가입 신청하기 →
@@ -221,6 +221,15 @@ export default async function PlanDetailPage({ params }: Props) {
           {/* 마지막 업데이트 */}
           <p className="text-center text-xs text-gray-400">
             마지막 업데이트: {plan.lastUpdated}
+          </p>
+          <p className="text-center text-xs text-gray-400">
+            {plan.carrier} 담당자이신가요?{" "}
+            <Link
+              href={`/partners?carrier=${encodeURIComponent(plan.carrier)}&type=correction`}
+              className="underline hover:text-gray-600 dark:hover:text-gray-300"
+            >
+              정보 수정·입점 문의
+            </Link>
           </p>
         </main>
       </div>

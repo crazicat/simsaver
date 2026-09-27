@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { Plan } from "@/lib/types";
-import { fmtData, fmtVoice, fmtFee } from "@/lib/plans";
+import { fmtData, fmtVoice, fmtFee, isStalePlan } from "@/lib/plans";
 
 export const SITE_URL = "https://simsaver.vercel.app";
 export const SITE_NAME = "알뜰폰갤러리";
@@ -46,8 +46,8 @@ export function buildPlanMetadata(plan: Plan): Metadata {
       description,
       images: [ogImage],
     },
-    // URL이 없는 요금제는 noindex (단종/미제공)
-    robots: plan.url ? "index, follow" : "noindex, follow",
+    // URL이 없거나 오래 갱신되지 않은 요금제는 noindex (단종/구표기 레코드)
+    robots: plan.url && !isStalePlan(plan) ? "index, follow" : "noindex, follow",
   };
 }
 

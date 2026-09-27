@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { Plan } from "@/lib/types";
-import { fmtFee, fmtData, fmtVoice, fmtSms, fmtThrottle, PlanBadge } from "@/lib/plans";
+import { fmtFee, fmtData, fmtVoice, fmtSms, fmtThrottle, PlanBadge, goUrl } from "@/lib/plans";
 
 interface Props {
   plan: Plan;
@@ -206,9 +206,9 @@ export default function PlanCard({
         {/* 가입하기 버튼 — 외부 링크 (stopPropagation으로 카드 클릭과 분리) */}
         {plan.url ? (
           <a
-            href={plan.url}
+            href={goUrl(plan, "card")}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="nofollow noopener"
             onClick={(e) => e.stopPropagation()}
             className="text-[11px] font-semibold text-brand-700 dark:text-brand-300
                        bg-brand-50 dark:bg-brand-950 hover:bg-brand-100 dark:hover:bg-brand-900

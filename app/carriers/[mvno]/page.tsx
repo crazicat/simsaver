@@ -217,6 +217,14 @@ export default async function CarrierPage({ params }: Props) {
             </div>
           </section>
 
+          {/* 통신사 담당자 */}
+          <p className="text-center text-xs text-gray-400">
+            {cfg.label} 알뜰폰 담당자이신가요?{" "}
+            <Link href="/partners" className="underline hover:text-gray-600 dark:hover:text-gray-300">
+              요금제 등록·정보 수정 문의
+            </Link>
+          </p>
+
           {/* CTA */}
           <div className="bg-blue-50 dark:bg-blue-950 rounded-2xl p-5 text-center">
             <p className="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-3">

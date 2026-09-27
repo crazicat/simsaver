@@ -32,6 +32,12 @@ export default function Footer() {
                 자주 묻는 질문
               </a>
               <a
+                href="/partners"
+                className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+              >
+                입점·광고 문의
+              </a>
+              <a
                 href="/sitemap.xml"
                 target="_blank"
                 rel="noopener noreferrer"

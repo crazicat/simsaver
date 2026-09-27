@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin", "/api/"],
+        disallow: ["/admin", "/api/", "/go/"],
       },
       // 네이버 봇 명시적 허용
       { userAgent: "Yeti", allow: "/" },
