@@ -31,6 +31,13 @@ export async function generateStaticParams() {
   return brands.map((b) => ({ brand: b.key }));
 }
 
+/** 받침 유무에 따라 조사 선택 ("이야기모바일" → "은", "SK7mobile" → "은(는)") */
+function josa(word: string, withBatchim: string, without: string): string {
+  const code = word.trim().charCodeAt(word.trim().length - 1);
+  if (code >= 0xac00 && code <= 0xd7a3) return word + ((code - 0xac00) % 28 ? withBatchim : without);
+  return `${word}${withBatchim}(${without})`;
+}
+
 /** "월 10원 (첫 12개월, 이후 14,300원)" 처럼 프로모션까지 풀어 쓴 가격 */
 function priceText(p: Plan): string {
   const base = `월 ${fmtFee(p.monthlyFee)}`;
@@ -52,18 +59,18 @@ function buildFaq(b: Brand): { q: string; a: string }[] {
   const faq = [
     {
       q: `${b.name}에서 가장 저렴한 요금제는?`,
-      a: `${b.name}의 ${b.plans.length}개 요금제 중 최저가는 ${cheapest.name}로 ${priceText(cheapest)}입니다. ${specText(cheapest)}. (${cheapest.lastUpdated} 수집 기준)`,
+      a: `${b.name}의 ${b.plans.length}개 요금제 중 최저가는 「${cheapest.name.replace(/\s+/g, " ")}」(${priceText(cheapest)})입니다. ${specText(cheapest)}. (${cheapest.lastUpdated} 수집 기준)`,
     },
     {
-      q: `${b.name}는 어떤 통신망을 쓰나요?`,
-      a: `${b.name}는 ${b.networks.join("·")} 망 요금제를 제공합니다.${b.has5G ? " 5G 요금제도 있습니다." : " 현재 수집된 5G 요금제는 없습니다."}`,
+      q: `${josa(b.name, "은", "는")} 어떤 통신망을 쓰나요?`,
+      a: `${josa(b.name, "은", "는")} ${b.networks.join("·")} 망 요금제를 제공합니다.${b.has5G ? " 5G 요금제도 있습니다." : " 현재 수집된 5G 요금제는 없습니다."}`,
     },
   ];
   const unlimitedCall = b.plans.find((p) => p.voice === "unlimited" && dataToGb(p.data) >= 10);
   if (unlimitedCall) {
     faq.push({
       q: `${b.name} 통화 무제한 + 데이터 10GB 이상 요금제 중 가장 싼 것은?`,
-      a: `${unlimitedCall.name} — ${priceText(unlimitedCall)}, ${specText(unlimitedCall)}.`,
+      a: `「${unlimitedCall.name.replace(/\s+/g, " ")}」 — ${priceText(unlimitedCall)}, ${specText(unlimitedCall)}.`,
     });
   }
   return faq;
