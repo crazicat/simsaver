@@ -26,6 +26,12 @@ export default function Footer() {
                 요금제 비교
               </a>
               <a
+                href="/brands"
+                className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+              >
+                통신사별 요금제
+              </a>
+              <a
                 href="/faq"
                 className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
               >

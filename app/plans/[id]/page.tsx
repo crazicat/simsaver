@@ -5,6 +5,7 @@ import { fetchPlanById, fetchPlansFromDb, fmtData, fmtVoice, fmtSms, fmtFee, fmt
 import { buildPlanMetadata } from "@/lib/seo/metadata";
 import { buildProductJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { SITE_URL } from "@/lib/seo/metadata";
+import { brandKey, brandPath } from "@/lib/brands";
 
 // ISR: 하루 1회 재검증 (크롤러가 매일 갱신)
 export const revalidate = 86400;
@@ -60,7 +61,7 @@ export default async function PlanDetailPage({ params }: Props) {
   const productJsonLd = buildProductJsonLd(plan);
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "홈", url: SITE_URL },
-    { name: "요금제 비교", url: SITE_URL },
+    { name: plan.carrier.split("(")[0].trim(), url: `${SITE_URL}${brandPath(brandKey(plan.carrier))}` },
     { name: `${plan.name} — ${plan.carrier}`, url: `${SITE_URL}/plans/${plan.id}` },
   ]);
 
@@ -129,7 +130,11 @@ export default async function PlanDetailPage({ params }: Props) {
                 <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">무약정</span>
               )}
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{plan.carrier}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+              <Link href={brandPath(brandKey(plan.carrier))} className="hover:underline">
+                {plan.carrier} 요금제 전체 보기 ›
+              </Link>
+            </p>
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50 leading-snug mb-4">
               {plan.name}
             </h2>
